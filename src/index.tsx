@@ -1,14 +1,36 @@
 /* @refresh reload */
-import { render } from "solid-js/web";
+import { For, render } from "solid-js/web";
 
 import "./index.css";
 import type { Component } from "solid-js";
+import { Layout } from "./components/layout";
+import Card from "./components/card";
+import type { CardProps } from "./types/interfaces";
+
+const cards = [
+    {
+        title: "API-er",
+        children: <p>Sjekk ut mine API-er</p>,
+        to: "https://api.martials.no/",
+    },
+    {
+        title: "Hjemmeside",
+        children: <p>Sjekk ut mine andre prosjekter</p>,
+        to: "https://h600878.github.io/",
+    }
+] satisfies CardProps[];
 
 const HomePage: Component = () => {
     return (
-        <>
-            <p class="text-4xl text-green-700 text-center py-20">Hello tailwind!</p>
-        </>
+        <Layout title={ "Velkommen!" }>
+            <div class={ "flex justify-center mt-10" }>
+                <For each={ cards }>
+                    { card =>
+                        <Card title={ card.title } className={ "m-4" } to={ card.to }>{ card.children }</Card>
+                    }
+                </For>
+            </div>
+        </Layout>
     );
 };
 

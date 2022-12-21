@@ -4,6 +4,11 @@
 
 @layer components {
 
+    .debug {
+        @apply border border-red-500;
+        @apply after:content-['DEBUG'] after:absolute;
+    }
+
     .link {
         @apply hover:underline text-blue-500;
     }
