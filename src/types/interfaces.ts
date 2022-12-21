@@ -17,9 +17,9 @@ export interface LinkProps extends ChildProps {
 }
 
 export interface TitleProps extends ChildProps {
-    title: string,
+    title?: string,
 }
 
 export interface CardProps extends LinkProps {
-    title: string;
+    title?: string;
 }

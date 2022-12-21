@@ -2,8 +2,8 @@
 import { For, render } from "solid-js/web";
 
 import "./index.css";
-import type { Component } from "solid-js";
-import { Layout } from "./components/layout";
+import { type Component } from "solid-js";
+import Layout from "./components/layout";
 import Card from "./components/card";
 import type { CardProps } from "./types/interfaces";
 
@@ -23,7 +23,7 @@ const cards = [
 const HomePage: Component = () => {
     return (
         <Layout title={ "Velkommen!" }>
-            <div class={ "flex justify-center mt-10" }>
+            <div class={ "flex flex-wrap justify-center mt-10" }>
                 <For each={ cards }>
                     { card =>
                         <Card title={ card.title } className={ "m-4" } to={ card.to }>{ card.children }</Card>

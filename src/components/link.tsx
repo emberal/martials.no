@@ -2,7 +2,7 @@
 import { type Component } from "solid-js";
 import type { LinkProps } from "../types/interfaces";
 
-export const A: Component<LinkProps> = (
+export const Link: Component<LinkProps> = (
     {
         to,
         rel,
