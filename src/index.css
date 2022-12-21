@@ -10,7 +10,7 @@
     }
 
     .link {
-        @apply hover:underline text-blue-500;
+        @apply hover:underline text-cyan-500;
     }
 
 }

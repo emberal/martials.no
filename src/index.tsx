@@ -26,7 +26,7 @@ const HomePage: Component = () => {
             <div class={ "flex flex-wrap justify-center mt-10" }>
                 <For each={ cards }>
                     { card =>
-                        <Card title={ card.title } className={ "m-4" } to={ card.to }>{ card.children }</Card>
+                        <Card title={ card.title } className={ "m-4 text-center" } to={ card.to }>{ card.children }</Card>
                     }
                 </For>
             </div>

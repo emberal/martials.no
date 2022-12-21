@@ -9,7 +9,7 @@ const Card: Component<CardProps> = ({ children, className, title, to, newTab = f
         <>
             <Link className={ "text-white" } to={ to } newTab={ newTab }>
                 <div
-                    class={ `relative bg-gradient-to-r from-cyan-600 to-cyan-500 min-w-64 rounded-2xl ${ className }` }>
+                    class={ `relative bg-gradient-to-r from-cyan-600 to-cyan-500 h-32 w-64 rounded-2xl ${ className }` }>
                     <div class="relative p-5">
                         <H3 className={ "text-center" }>{ title }</H3>
                         { children }
