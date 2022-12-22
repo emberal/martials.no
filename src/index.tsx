@@ -6,12 +6,24 @@ import { type Component } from "solid-js";
 import Layout from "./components/layout";
 import Card from "./components/card";
 import type { CardProps } from "./types/interfaces";
+import { Link } from "./components/link";
+
+const apiRoot = "https://api.martials.no";
 
 const cards = [
     {
         title: "API-er",
-        children: <p>Sjekk ut mine API-er</p>,
-        to: "https://api.martials.no/",
+        children: <>
+            <p>Sjekk ut mine API-er</p>
+            <ul>
+                <li>
+                    <Link className={ "text-white" } to={ `${ apiRoot }/simplify_truths` }>
+                        Forenkle sannhetsverdier
+                    </Link>
+                </li>
+            </ul>
+        </>,
+        to: apiRoot,
     },
     {
         title: "Hjemmeside",
@@ -26,7 +38,7 @@ const HomePage: Component = () => {
             <div class={ "flex flex-wrap justify-center mt-10" }>
                 <For each={ cards }>
                     { card =>
-                        <Card title={ card.title } className={ "m-4 text-center" } to={ card.to }>{ card.children }</Card>
+                        <Card title={ card.title } className={ "m-4" } to={ card.to }>{ card.children }</Card>
                     }
                 </For>
             </div>
