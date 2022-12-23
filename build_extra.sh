@@ -23,4 +23,6 @@ fi
 
 if [ -e .htaccess ]; then
   cp .htaccess dist
+else
+  echo ".htaccess not found"
 fi
