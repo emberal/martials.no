@@ -1,0 +1,3 @@
+Contact: mailto:me@martials.no
+Expires: 2030-12-31
+Preferred-Languages: no

@@ -8,5 +8,11 @@ export default defineConfig({
     },
     build: {
         target: 'esnext',
+        rollupOptions: {
+            input: {
+                main: "index.html",
+                "404": "404.html",
+            }
+        }
     },
 });
