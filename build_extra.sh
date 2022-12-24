@@ -5,24 +5,17 @@ if [ ! -e dist ]; then
   vite build
 fi
 
-if [ -e robots.txt ]; then
-  cp robots.txt dist
-else
-  echo "robots.txt not found"
-fi
+# Copying the file ($1) to the dist directory, or to subdirectory ($2)
+copy() {
+  if [ -e "$1" ]; then
+    cp "$1" dist/"$2"
+  else
+    echo "'$1' not found, skipping"
+  fi
+}
 
 mkdir -p "dist/.well-known"
 
-if [ -e "dist/.well-known" ]; then
-  if [ -e security.txt ]; then
-    cp security.txt dist/.well-known
-  else
-    echo "security.txt not found"
-  fi
-fi
-
-if [ -e .htaccess ]; then
-  cp .htaccess dist
-else
-  echo ".htaccess not found"
-fi
+copy robots.txt
+copy security.txt .well-known
+copy .htaccess
