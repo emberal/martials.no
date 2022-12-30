@@ -17,7 +17,7 @@ const cards = [
             <p>Sjekk ut mine API-er</p>
             <ul>
                 <li>
-                    <Link className={ "text-white" } to={ `${ apiRoot }/simplify_truths` }>
+                    <Link className={ "text-white" } to={ `${ apiRoot }/simplify-truths` }>
                         Forenkle sannhetsverdier
                     </Link>
                 </li>
