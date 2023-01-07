@@ -9,6 +9,18 @@
         @apply after:content-['DEBUG'] after:absolute;
     }
 
+    .flex-row-center {
+        @apply flex flex-row items-center;
+    }
+
+    .border-rounded {
+        @apply border rounded-2xl border-gray-700;
+    }
+
+    input[type="submit"] {
+        @apply border-rounded bg-cyan-900 px-2 cursor-pointer;
+    }
+
     h1 {
         @apply text-4xl;
     }

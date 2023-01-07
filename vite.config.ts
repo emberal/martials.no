@@ -12,6 +12,7 @@ export default defineConfig({
             input: {
                 main: "index.html",
                 "404": "404.html",
+                simplifyTruths: "simplify-truths.html",
             }
         }
     },
