@@ -5,9 +5,7 @@ import { Input } from "./components/input";
 import { Icon } from "solid-heroicons";
 import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
-// import MySwitch from "./components/switch";
 // import { diffChars } from "diff";
-// import { Menu } from "@headlessui/react";
 // import MyMenu from "./components/menu";
 // import { type BookType, utils, write, writeFile } from "xlsx"
 // import MyDialog from "./components/myDialog";
@@ -16,6 +14,7 @@ import { type Component, createSignal, JSX, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
 import { magnifyingGlass, xMark } from "solid-heroicons/solid";
+import { MySwitch } from "./components/button";
 
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
@@ -66,34 +65,36 @@ const TruthTablePage: Component = () => {
         e.preventDefault(); // Stops the page from reloading onClick
         const exp = (document.getElementById(inputId) as HTMLInputElement | null)?.value;
 
+        setFetchResult(null);
+
         if (exp && exp !== "") {
 
             // TODO add loading animation
             let result: FetchResult | undefined;
-            await fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }`)
+            await fetch(`http://localhost:8080/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }`)
                 .then(res => res.json())
                 .then(res => result = res)
                 .catch(err => console.error(err)) // TODO show error on screen
                 .finally();
 
-            console.log(result);
+            // console.log(result);
             setFetchResult(result);
-        }
-        else {
-            setFetchResult(null);
         }
     }
 
+    function getInput() {
+        return document.getElementById(inputId) as HTMLInputElement | null;
+    }
+
     function onTyping() {
-        console.log("typing");
-        const el = (document.getElementById(inputId) as HTMLInputElement | null);
+        const el = getInput();
         if (el && (el.value !== "") !== typing()) {
             setTyping(el.value !== "");
         }
     }
 
     function clearSearch() {
-        const el = (document.getElementById(inputId) as HTMLInputElement | null);
+        const el = getInput();
         if (el) {
             el.value = "";
             setFetchResult(null);
@@ -203,8 +204,9 @@ const TruthTablePage: Component = () => {
 
                     <Row className={ "my-1 gap-2" }>
                         <span class={ "h-min" }>{ "Simplify" }: </span>
-                        {/*<MySwitch onChange={ setSimplifyEnabled } checked={ simplifyEnabled } title={ t("simplify") }*/ }
-                        {/*          name={ t("toggleSimplify") } className={ "mx-1" } />*/ }
+                        <MySwitch onChange={ setSimplifyEnabled } defaultValue={ simplifyEnabled() }
+                                  title={ "Simplify" }
+                                  name={ "Turn on/off simplify expressions" } className={ "mx-1" } />
 
                         <div class={ "h-min relative" }>
                             {/*<MyMenu title={ "Filter results" }*/ }
@@ -261,59 +263,61 @@ const TruthTablePage: Component = () => {
                         {/*}*/ }
 
                     </Row>
-                    {/*{*/ }
-                    {/*    fetchResult && fetchResult()?.status.code !== 200 &&*/ }
-                    {/*    <InfoBox className={ "w-fit text-center" }*/ }
-                    {/*             title={ t("inputError") }*/ }
-                    {/*             error={ true }>*/ }
-                    {/*        <p>{ fetchResult()?.status.message }</p>*/ }
-                    {/*    </InfoBox>*/ }
-                    {/*}*/ }
-                    {/*{*/ }
-                    {/*    fetchResult()?.orderOperations && simplifyEnabled() && fetchResult()?.orderOperations.length > 0 &&*/ }
-                    {/*    <MyDisclosureContainer>*/ }
-                    {/*        <MyDisclosure title={ t("showMeHowItsDone") }>*/ }
-                    {/*            <table class={ "table" }>*/ }
-                    {/*                <tbody>*/ }
-                    {/*                    <For each={ fetchResult()?.orderOperations }>{*/ }
-                    {/*                        (operation, index) => (*/ }
-                    {/*                            <tr class={ "border-b border-dotted border-gray-500" }>*/ }
-                    {/*                                <td>{ index() + 1 }:</td>*/ }
-                    {/*                                <td class={ "px-2" }>*/ }
-                    {/*                                    /!*<For each={ diffChars(operation.before, operation.after) }>*!/*/ }
-                    {/*                                    /!*    { (part) => (*!/*/ }
-                    {/*                                    /!*        <span class={*!/*/ }
-                    {/*                                    /!*            `${ part.added && "bg-green-500 dark:bg-green-700 default-text-black-white" } *!/*/ }
-                    {/*                                    /!*            ${ part.removed && "bg-red-500 dark:bg-red-700 default-text-black-white" }` }>*!/*/ }
-                    {/*                                    /!*        { part.value }*!/*/ }
-                    {/*                                    /!*    </span>) }*!/*/ }
-                    {/*                                    /!*</For>*!/*/ }
-                    {/*                                    { typeof window !== "undefined" && window.outerWidth <= 640 &&*/ }
-                    {/*                                        <p>{ t("using") }: { operation.law }</p> }*/ }
-                    {/*                                </td>*/ }
-                    {/*                                { typeof window !== "undefined" && window.outerWidth > 640 &&*/ }
-                    {/*                                    <td>{ t("using") }: { operation.law }</td> }*/ }
-                    {/*                            </tr>*/ }
-                    {/*                        ) }*/ }
-                    {/*                    </For>*/ }
-                    {/*                </tbody>*/ }
-                    {/*            </table>*/ }
-                    {/*        </MyDisclosure>*/ }
-                    {/*    </MyDisclosureContainer>*/ }
-                    {/*}*/ }
+                    {
+                        fetchResult() && fetchResult()?.status.code !== 200 &&
+                        <InfoBox className={ "w-fit text-center" }
+                                 title={ "Input error" }
+                                 error={ true }>
+                            <p>{ fetchResult()?.status.message }</p>
+                        </InfoBox>
+                    }
+                    {
+                        fetchResult()?.orderOperations && simplifyEnabled() && fetchResult()?.orderOperations.length > 0 &&
+                        <MyDisclosureContainer>
+                            <MyDisclosure title={ "Show me how it's done" }>
+                                <table class={ "table" }>
+                                    <tbody>
+                                        <For each={ fetchResult()?.orderOperations }>{
+                                            (operation, index) => (
+                                                <tr class={ "border-b border-dotted border-gray-500" }>
+                                                    <td>{ index() + 1 }:</td>
+                                                    <td class={ "px-2" }>
+                                                        {/* // TODO add method or create own
+                                                        <For each={ diffChars(operation.before, operation.after) }>
+                                                            { (part) => (
+                                                                <span class={
+                                                                    `${ part.added && "bg-green-700" }
+                                                                    ${ part.removed && "bg-red-700" }` }>
+                                                                { part.value }
+                                                            </span>) }
+                                                        </For>
+                                                        */ }
+                                                        { typeof window !== "undefined" && window.outerWidth <= 640 &&
+                                                            <p>{ "using" }: { operation.law }</p> }
+                                                    </td>
+                                                    { typeof window !== "undefined" && window.outerWidth > 640 &&
+                                                        <td>{ "using" }: { operation.law }</td> }
+                                                </tr>
+                                            ) }
+                                        </For>
+                                    </tbody>
+                                </table>
+                            </MyDisclosure>
+                        </MyDisclosureContainer>
+                    }
                 </div>
                 {
                     fetchResult()?.expression &&
                     <>
-                        {/*<div class={ "flex flex-row" }>*/ }
-                        {/*    {*/ }
-                        {/*        simplifyEnabled &&*/ }
-                        {/*        <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }*/ }
-                        {/*                 title={ t("output") + ":" } id={ "expression-output" }>*/ }
-                        {/*            <p>{ fetchResult()?.after }</p>*/ }
-                        {/*        </InfoBox>*/ }
-                        {/*    }*/ }
-                        {/*</div>*/ }
+                        <div class={ "flex flex-row" }>
+                            {
+                                simplifyEnabled &&
+                                <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }
+                                         title={ "Output" + ":" } id={ "expression-output" }>
+                                    <p>{ fetchResult()?.after }</p>
+                                </InfoBox>
+                            }
+                        </div>
 
                         <div class={ "flex justify-center m-2" }>
                             <div id={ "table" } class={ "h-[45rem] overflow-auto" }>
