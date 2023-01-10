@@ -39,6 +39,7 @@ function setSetIsText(id: string | undefined, isText: boolean, setIsText: Setter
 interface Input<T> extends InputProps<T> {
     leading?: JSX.Element,
     trailing?: JSX.Element,
+    onChange?: () => void,
 }
 
 export const Input: Component<Input<HTMLInputElement>> = (
@@ -77,7 +78,7 @@ export const Input: Component<Input<HTMLInputElement>> = (
     return (
         <Row className={ "relative" }>
             { leading }
-            <HoverTitle title={ title } isActive={ isFocused() || isHover() || isText() } htmlFor={ id }/>
+            <HoverTitle title={ title } isActive={ isFocused() || isHover() || isText() } htmlFor={ id } />
             <input
                 class={ `bg-default-bg focus:border-cyan-500 outline-none border-2 border-gray-500 
                 hover:border-t-cyan-400 ${ className }` }
@@ -88,8 +89,12 @@ export const Input: Component<Input<HTMLInputElement>> = (
                 type={ type }
                 placeholder={ placeholder ?? undefined }
                 required={ required }
-                onInput={ () => setSetIsText(id, isText(), setIsText) }
-                onChange={ onChange /*TODO only called after ENTER*/ }/>
+                onInput={ () => {
+                    setSetIsText(id, isText(), setIsText);
+                    if (onChange) {
+                        onChange();
+                    }
+                } } />
             { trailing }
         </Row>
     );
@@ -107,7 +112,7 @@ function HoverTitle(
             transition-all duration-150 text-gray-600 dark:text-gray-400` }
                for={ htmlFor }>
             <div class={ "z-50 relative" }>{ title }</div>
-            <div class={ "w-full h-2 default-bg absolute bottom-1/3 z-10" }/>
+            <div class={ "w-full h-2 default-bg absolute bottom-1/3 z-10" } />
         </label>
     );
 }
