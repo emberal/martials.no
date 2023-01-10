@@ -22,7 +22,7 @@ export interface TitleProps extends ChildProps {
 }
 
 export interface InputProps<T> extends TitleProps {
-    onChange?: JSX.EventHandlerUnion<T, Event>,
+    onInput?: JSX.EventHandlerUnion<T, Event>,
     placeholder?: string | null,
     required?: boolean,
     type?: string,
