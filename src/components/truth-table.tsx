@@ -26,7 +26,7 @@ const TruthTable: Component<TruthTableProps> = (
                     <For each={ header }>
                         { (exp) => (
                             <th scope={ "col" }
-                                class={ `default-bg text-center sticky top-0 [position:-webkit-sticky;]
+                                class={ `bg-default-bg text-center sticky top-0 [position:-webkit-sticky;]
                              outline outline-2 outline-offset-[-1px] outline-gray-500` /*TODO sticky header at the top of the screen */ }>
                                 <p class={ "px-2" }>{ exp }</p>
                             </th>
@@ -37,11 +37,11 @@ const TruthTable: Component<TruthTableProps> = (
             <tbody>
                 <For each={ table }>
                     { (row) =>
-                        <tr class={ "dark:hover:text-black hover:text-white" }>
+                        <tr class={ "hover:text-black" }>
                             <For each={ row }>
                                 { (value) =>
                                     <td class={ `text-center border border-gray-500 last:underline
-                                ${ value ? "bg-green-500 dark:bg-green-700" : "bg-red-500 dark:bg-red-700" }` }>
+                                            ${ value ? "bg-green-700" : "bg-red-700" }` }>
                                         <p>{ value ? "T" : "F" }</p>
                                     </td>
                                 }
