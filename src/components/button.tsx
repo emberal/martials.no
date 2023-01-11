@@ -1,6 +1,6 @@
 /* @refresh reload */
-import { type Component, createSignal } from "solid-js";
-import type { TitleProps } from "../types/interfaces";
+import { type Component, createSignal, JSX } from "solid-js";
+import type { ButtonProps, ChildProps, TitleProps } from "../types/interfaces";
 
 interface SwitchProps extends TitleProps {
     defaultValue?: boolean,
@@ -15,7 +15,7 @@ export const MySwitch: Component<SwitchProps> = (
         className,
         name,
         id
-    }) => {
+    }): JSX.Element => {
 
     const [checked, setChecked] = createSignal(defaultValue);
 
@@ -39,3 +39,23 @@ export const MySwitch: Component<SwitchProps> = (
         </button>
     );
 };
+
+export const Button: Component<ButtonProps> = (
+    {
+        className,
+        title,
+        children,
+        id,
+        onClick,
+        type = "button",
+    }
+): JSX.Element => {
+    return (
+        <button title={ title } id={ id } type={ type }
+                class={ `border-rounded bg-cyan-900 px-2 cursor-pointer ${ className }` }
+                onClick={ onClick }>
+            { children }
+        </button>
+    );
+};
+
