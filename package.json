@@ -1,7 +1,7 @@
 {
   "name": "martials-no",
-  "version": "0.1",
-  "description": "",
+  "version": "1.0",
+  "description": "Landing page Martin Berg Alstad's APIs and other things",
   "scripts": {
     "dev": "vite",
     "build": "vite build && sh build_extra.sh",
@@ -17,8 +17,11 @@
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@types/diff": "^5.0.2",
+    "diff": "^5.1.0",
     "solid-headless": "^0.13.0",
     "solid-heroicons": "^3.1.1",
-    "solid-js": "^1.6.6"
+    "solid-js": "^1.6.6",
+    "xlsx": "^0.18.5"
   }
 }

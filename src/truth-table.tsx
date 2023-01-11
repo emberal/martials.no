@@ -1,20 +1,19 @@
 /* @refresh reload */
 import Layout from "./components/layout";
 import { Input } from "./components/input";
-// import { Check, Download, Eye, EyeOff, Filter, Search, X } from "react-feather";
 import { Icon } from "solid-heroicons";
 import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
-// import { diffChars } from "diff";
+import { diffChars } from "diff";
 // import MyMenu from "./components/menu";
-// import { type BookType, utils, write, writeFile } from "xlsx"
-// import MyDialog from "./components/myDialog";
+import { type BookType, utils, write, writeFile } from "xlsx"
 import type { FetchResult } from "./types/interfaces";
-import { type Component, createSignal, JSX, Show } from "solid-js";
+import { type Component, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
-import { magnifyingGlass, xMark } from "solid-heroicons/solid";
-import { MySwitch } from "./components/button";
+import { arrowDownTray, magnifyingGlass, xMark } from "solid-heroicons/solid";
+import { Button, MySwitch } from "./components/button";
+import MyDialog from "./components/dialog";
 
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
@@ -71,7 +70,7 @@ const TruthTablePage: Component = () => {
 
             // TODO add loading animation
             let result: FetchResult | undefined;
-            await fetch(`http://localhost:8080/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }`)
+            await fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }`)
                 .then(res => res.json())
                 .then(res => result = res)
                 .catch(err => console.error(err)) // TODO show error on screen
@@ -82,19 +81,19 @@ const TruthTablePage: Component = () => {
         }
     }
 
-    function getInput() {
+    function getInputElement() {
         return document.getElementById(inputId) as HTMLInputElement | null;
     }
 
     function onTyping() {
-        const el = getInput();
+        const el = getInputElement();
         if (el && (el.value !== "") !== typing()) {
             setTyping(el.value !== "");
         }
     }
 
     function clearSearch() {
-        const el = getInput();
+        const el = getInputElement();
         if (el) {
             el.value = "";
             setFetchResult(null);
@@ -106,9 +105,9 @@ const TruthTablePage: Component = () => {
     const tableId = "truth-table";
     const filenameId = "excel-filename";
 
-    document.addEventListener("DOMContentLoaded", () => {
+    onMount(() => {
         // Focuses searchbar on load
-        (document.getElementById(inputId) as HTMLInputElement | null)?.focus();
+        getInputElement()?.focus();
     });
 
     /**
@@ -137,26 +136,26 @@ const TruthTablePage: Component = () => {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    // function exportToExcel(
-    //     {
-    //         type = "xlsx",
-    //         name = "Truth Table",
-    //         dl = false
-    //     }: { type?: BookType, name?: string, dl?: boolean }): any {
-    //
-    //     const element = document.getElementById(tableId);
-    //     const wb = utils.table_to_book(element, { sheet: "sheet1" });
-    //     return dl ?
-    //         write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-    //         writeFile(wb, name + "." + type);
-    // }
-    //
-    // function _exportToExcel(): void {
-    //     const value = (document.getElementById(filenameId) as HTMLInputElement | null)?.value;
-    //     exportToExcel({
-    //         name: value !== "" ? value : undefined,
-    //     });
-    // }
+    function exportToExcel(
+        {
+            type = "xlsx",
+            name = "Truth Table",
+            dl = false
+        }: { type?: BookType, name?: string, dl?: boolean }): any {
+
+        const element = document.getElementById(tableId);
+        const wb = utils.table_to_book(element, { sheet: "sheet1" });
+        return dl ?
+            write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+            writeFile(wb, name + "." + type);
+    }
+
+    function _exportToExcel(): void {
+        const value = (document.getElementById(filenameId) as HTMLInputElement | null)?.value;
+        exportToExcel({
+            name: value !== "" ? value : undefined,
+        });
+    }
 
     return (
         <Layout title={ "Truth tables" }
@@ -187,7 +186,7 @@ const TruthTablePage: Component = () => {
                                onChange={ onTyping }
                                leading={ <Icon path={ magnifyingGlass } class={ "pl-1 absolute h-6" } /> }
                                trailing={ <Show when={ typing() } keyed>
-                                   <button class={ "absolute left-44 sm:left-[22rem]" /*TODO*/ }
+                                   <button class={ "absolute left-44 sm:left-[22rem]" }
                                            title={ "Clear" }
                                            type={ "reset" }
                                            onClick={ clearSearch }>
@@ -195,11 +194,11 @@ const TruthTablePage: Component = () => {
                                    </button>
                                </Show> }
                         />
-                        <input id={ "truth-input-button" }
-                               title={ "Generate (Enter)" }
-                               type={ "submit" }
-                               class={ "button min-w-50px h-10 ml-2" }
-                               value={ "Generate" } />
+                        <Button id={ "truth-input-button" }
+                                title={ "Generate (Enter)" }
+                                type={ "submit" }
+                                className={ "min-w-50px h-10 ml-2" }
+                                children={ "Generate" } />
                     </form>
 
                     <Row className={ "my-1 gap-2" }>
@@ -245,27 +244,30 @@ const TruthTablePage: Component = () => {
                             {/*/>*/ }
                         </div>
 
-                        {/*{*/ }
-                        {/*    fetchResult()?.expression &&*/ }
-                        {/*    <MyDialog title={ t("download") }*/ }
-                        {/*              description={ t("exportCurrentTable") + " (.xlsx)" }*/ }
-                        {/*              button={ <><p class={ "sr-only" }>{ t("download") }</p><Download /></> }*/ }
-                        {/*              callback={ _exportToExcel }*/ }
-                        {/*              acceptButtonName={ t("download") }*/ }
-                        {/*              cancelButtonName={ t("cancel") }*/ }
-                        {/*              buttonClasses={ `float-right` }*/ }
-                        {/*              buttonTitle={ t("exportCurrentTable") }*/ }
-                        {/*              acceptButtonId={ "download-accept" }>*/ }
-                        {/*        <p>{ t("filename") }:</p>*/ }
-                        {/*        <Input className={ "border-rounded h-10" } id={ filenameId }*/ }
-                        {/*               placeholder={ "Truth Table" } />*/ }
-                        {/*    </MyDialog>*/ }
-                        {/*}*/ }
+                        {
+                            fetchResult()?.expression &&
+                            <MyDialog title={ "Download" }
+                                      description={ "Export current table (.xlsx)" }
+                                      button={ <>
+                                          <p class={ "sr-only" }>{ "Download" }</p>
+                                          <Icon class={ "w-6 h-6" } path={ arrowDownTray } />
+                                      </> }
+                                      callback={ _exportToExcel }
+                                      acceptButtonName={ "Download" }
+                                      cancelButtonName={ "Cancel" }
+                                      buttonClasses={ `float-right` }
+                                      buttonTitle={ "Export current table" }
+                                      acceptButtonId={ "download-accept" }>
+                                <p>{ "Filename" }:</p>
+                                <Input className={ "border-rounded h-10 px-2" } id={ filenameId }
+                                       placeholder={ "Truth Table" } />
+                            </MyDialog>
+                        }
 
                     </Row>
                     {
                         fetchResult() && fetchResult()?.status.code !== 200 &&
-                        <InfoBox className={ "w-fit text-center" }
+                        <InfoBox className={ "w-fit text-center mx-auto" }
                                  title={ "Input error" }
                                  error={ true }>
                             <p>{ fetchResult()?.status.message }</p>
@@ -281,8 +283,8 @@ const TruthTablePage: Component = () => {
                                             (operation, index) => (
                                                 <tr class={ "border-b border-dotted border-gray-500" }>
                                                     <td>{ index() + 1 }:</td>
-                                                    <td class={ "px-2" }>
-                                                        {/* // TODO add method or create own
+                                                    <td class={ "px-2" }>{
+
                                                         <For each={ diffChars(operation.before, operation.after) }>
                                                             { (part) => (
                                                                 <span class={
@@ -290,8 +292,8 @@ const TruthTablePage: Component = () => {
                                                                     ${ part.removed && "bg-red-700" }` }>
                                                                 { part.value }
                                                             </span>) }
-                                                        </For>
-                                                        */ }
+                                                        </For> }
+
                                                         { typeof window !== "undefined" && window.outerWidth <= 640 &&
                                                             <p>{ "using" }: { operation.law }</p> }
                                                     </td>
@@ -321,7 +323,7 @@ const TruthTablePage: Component = () => {
 
                         <div class={ "flex justify-center m-2" }>
                             <div id={ "table" } class={ "h-[45rem] overflow-auto" }>
-
+                                { /*TODO make sure table uses whole width and x-scrollable*/ }
                                 <TruthTable header={ fetchResult()?.header ?? undefined }
                                             table={ fetchResult()?.table?.truthMatrix } id={ tableId } />
 

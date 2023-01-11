@@ -21,6 +21,11 @@ export interface TitleProps extends ChildProps {
     title?: string,
 }
 
+export interface ButtonProps extends TitleProps {
+    onClick?: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
+    type?: "button" | "submit" | "reset",
+}
+
 export interface InputProps<T> extends TitleProps {
     onInput?: JSX.EventHandlerUnion<T, Event>,
     placeholder?: string | null,
