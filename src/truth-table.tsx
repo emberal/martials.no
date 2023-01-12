@@ -8,7 +8,7 @@ import { diffChars } from "diff";
 import MyMenu from "./components/menu";
 import { type BookType, utils, write, writeFile } from "xlsx"
 import type { FetchResult } from "./types/interfaces";
-import { type Component, createEffect, createSignal, JSX, onMount, Show } from "solid-js";
+import { Accessor, type Component, createEffect, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
 import { arrowDownTray, check, eye, eyeSlash, funnel, magnifyingGlass, xMark } from "solid-heroicons/solid";
@@ -225,7 +225,7 @@ const TruthTablePage: Component = () => {
                                             { (option) => (
                                                 <SingleMenuItem onClick={ () => setHideValues(option) }
                                                                 option={ option }
-                                                                currentValue={ hideValues() } />
+                                                                currentValue={ hideValues } />
                                             ) }
                                         </For>
                                     } itemsClassName={ "right-0" }
@@ -240,7 +240,7 @@ const TruthTablePage: Component = () => {
                                     children={
                                         <For each={ sortOptions }>
                                             { (option) => (
-                                                <SingleMenuItem option={ option } currentValue={ sortValues() }
+                                                <SingleMenuItem option={ option } currentValue={ sortValues }
                                                                 onClick={ () => setSortValues(option) } />
                                             ) }
                                         </For>
@@ -346,7 +346,7 @@ export default TruthTablePage;
 
 interface SingleMenuItem {
     option: Option,
-    currentValue?: Option,
+    currentValue?: Accessor<Option>,
     onClick: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>,
 }
 
@@ -356,7 +356,7 @@ const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onCli
         <div class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
              onClick={ onClick }>
             <Icon path={ check }
-                  class={ `h-6 w-6 text-white ${ currentValue.value !== option.value && "text-transparent" }` } />
+                  class={ `h-6 w-6 text-white ${ currentValue().value !== option.value && "text-transparent" }` } />
             { option.name }
         </div>
     );
