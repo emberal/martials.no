@@ -5,15 +5,17 @@ import { Icon } from "solid-heroicons";
 import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
 import { diffChars } from "diff";
-// import MyMenu from "./components/menu";
+import MyMenu from "./components/menu";
 import { type BookType, utils, write, writeFile } from "xlsx"
 import type { FetchResult } from "./types/interfaces";
-import { type Component, createSignal, JSX, onMount, Show } from "solid-js";
+import { type Component, createEffect, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
-import { arrowDownTray, magnifyingGlass, xMark } from "solid-heroicons/solid";
+import { arrowDownTray, check, eye, eyeSlash, funnel, magnifyingGlass, xMark } from "solid-heroicons/solid";
 import { Button, MySwitch } from "./components/button";
 import MyDialog from "./components/dialog";
+
+type Option = { name: string, value: string };
 
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
@@ -34,13 +36,13 @@ const TruthTablePage: Component = () => {
      */
     const [typing, setTyping] = createSignal(false);
 
-    const hideOptions = [
+    const hideOptions: Option[] = [
         { name: "Show all result", value: "NONE" },
         { name: "Hide true results", value: "TRUE" },
         { name: "Hide false results", value: "FALSE" },
     ];
 
-    const sortOptions = [
+    const sortOptions: Option[] = [
         { name: "Sort by default", value: "DEFAULT" },
         { name: "Sort by true first", value: "TRUE_FIRST" },
         { name: "Sort by false first", value: "FALSE_FIRST" },
@@ -208,44 +210,47 @@ const TruthTablePage: Component = () => {
                                   name={ "Turn on/off simplify expressions" } className={ "mx-1" } />
 
                         <div class={ "h-min relative" }>
-                            {/*<MyMenu title={ "Filter results" }*/ }
-                            {/*        // button={*/ }
-                            {/*        //     hideValues().value === "none" ?*/ }
-                            {/*        //         <Eye className={ "mx-1" } /> :*/ }
-                            {/*        //         <EyeOff className={ `mx-1 ${ hideValues().value === "TRUE" ?*/ }
-                            {/*        //             "text-green-500" : "text-red-500" }` } />*/ }
-                            {/*        // }*/ }
-                            {/*        children={*/ }
-                            {/*            <For each={ hideOptions }>*/ }
-                            {/*                { (option) => (*/ }
-                            {/*                    <SingleMenuItem onClick={ () => setHideValues(option) }*/ }
-                            {/*                                    option={ option }*/ }
-                            {/*                                    currentValue={ hideValues } />)*/ }
-                            {/*                }*/ }
-                            {/*            </For>*/ }
-                            {/*        } itemsClassName={ "right-0" }*/ }
-                            {/*/>*/ }
+                            <MyMenu title={ "Filter results" } id={ "filter-results" }
+                                    button={
+                                        <Show when={ hideValues().value !== "NONE" } children={
+                                            <Icon path={ eyeSlash }
+                                                  class={ `mx-1 h-6 w-6 ${ hideValues().value === "TRUE" ?
+                                                      "text-green-500" : "text-red-500" }` } />
+                                        } fallback={
+                                            <Icon path={ eye } class={ "mx-1 h-6 w-6" } />
+                                        } keyed />
+                                    }
+                                    children={
+                                        <For each={ hideOptions }>
+                                            { (option) => (
+                                                <SingleMenuItem onClick={ () => setHideValues(option) }
+                                                                option={ option }
+                                                                currentValue={ hideValues() } />
+                                            ) }
+                                        </For>
+                                    } itemsClassName={ "right-0" }
+                            />
                         </div>
 
                         <div class={ "h-min relative" }>
-                            {/*<MyMenu title={ t("sort") + " " + t("results") }*/ }
-                            {/*        button={ <Filter*/ }
-                            {/*            className={ sortValues().value === "trueFirst" ?*/ }
-                            {/*                "text-green-500" : sortValues().value === "falseFirst" ? "text-red-500" : "" } /> }*/ }
-                            {/*        children={*/ }
-                            {/*            <For each={ sortOptions }>*/ }
-                            {/*                { option => (*/ }
-                            {/*                    <SingleMenuItem option={ option } currentValue={ sortValues }*/ }
-                            {/*                                    onClick={ () => setSortValues(option) } />)*/ }
-                            {/*                }*/ }
-                            {/*            </For>*/ }
-                            {/*        }*/ }
-                            {/*        itemsClassName={ "right-0" }*/ }
-                            {/*/>*/ }
+                            <MyMenu title={ "Sort results" } id={ "sort-results" }
+                                    button={ <Icon path={ funnel }
+                                                   class={ `h-6 w-6 ${ sortValues().value === "TRUE_FIRST" ? "text-green-500" :
+                                                       sortValues().value === "FALSE_FIRST" && "text-red-500" }` } /> }
+                                    children={
+                                        <For each={ sortOptions }>
+                                            { (option) => (
+                                                <SingleMenuItem option={ option } currentValue={ sortValues() }
+                                                                onClick={ () => setSortValues(option) } />
+                                            ) }
+                                        </For>
+                                    }
+                                    itemsClassName={ "right-0" }
+                            />
                         </div>
 
-                        {
-                            fetchResult()?.expression &&
+                        <Show when={ fetchResult()?.expression } keyed>
+
                             <MyDialog title={ "Download" }
                                       description={ "Export current table (.xlsx)" }
                                       button={ <>
@@ -262,7 +267,8 @@ const TruthTablePage: Component = () => {
                                 <Input className={ "border-rounded h-10 px-2" } id={ filenameId }
                                        placeholder={ "Truth Table" } />
                             </MyDialog>
-                        }
+
+                        </Show>
 
                     </Row>
                     {
@@ -339,22 +345,20 @@ const TruthTablePage: Component = () => {
 export default TruthTablePage;
 
 interface SingleMenuItem {
-    option: any,
-    currentValue?: any,
+    option: Option,
+    currentValue?: Option,
     onClick: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>,
 }
 
+// TODO not rerendering when currentValue changes
 const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onClick }) => {
-    return (<></>
-        // <Menu.Item>
-        //     <div
-        //         class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
-        //         onClick={ onClick }>
-        //         <Check
-        //             className={ `${ currentValue.value !== option.value && "text-transparent" }` } />
-        //         { option.name }
-        //     </div>
-        // </Menu.Item>
+    return (
+        <div class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
+             onClick={ onClick }>
+            <Icon path={ check }
+                  class={ `h-6 w-6 text-white ${ currentValue.value !== option.value && "text-transparent" }` } />
+            { option.name }
+        </div>
     );
 }
 
