@@ -28,7 +28,7 @@ const TruthTable: Component<TruthTableProps> = (
                             <th scope={ "col" }
                                 class={ `bg-default-bg text-center sticky top-0 [position:-webkit-sticky;]
                              outline outline-2 outline-offset-[-1px] outline-gray-500` /*TODO sticky header at the top of the screen */ }>
-                                <p class={ "px-2" }>{ exp }</p>
+                                <p class={ "px-2 w-max" }>{ exp }</p>
                             </th>
                         ) }
                     </For>
