@@ -6,16 +6,24 @@ import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
 import { diffChars } from "diff";
 import MyMenu from "./components/menu";
-import { type BookType, utils, write, writeFile } from "xlsx"
 import type { FetchResult } from "./types/interfaces";
-import { Accessor, type Component, createEffect, createSignal, JSX, onMount, Show } from "solid-js";
+import { type Accessor, type Component, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
-import { arrowDownTray, check, eye, eyeSlash, funnel, magnifyingGlass, xMark } from "solid-heroicons/solid";
+import {
+    arrowDownTray, arrowPath,
+    check,
+    eye,
+    eyeSlash,
+    funnel,
+    magnifyingGlass,
+    xMark
+} from "solid-heroicons/solid";
 import { Button, MySwitch } from "./components/button";
 import MyDialog from "./components/dialog";
+import { exportToExcel } from "./functions/export";
 
-type Option = { name: string, value: string };
+type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
@@ -30,7 +38,6 @@ const TruthTablePage: Component = () => {
      * The state element used to store the simplified string, "empty string" by default
      */
     const [fetchResult, setFetchResult] = createSignal<FetchResult | null>(null);
-
     /**
      * If the searchbar is empty, this state is 'false', otherwise 'true'
      */
@@ -42,21 +49,19 @@ const TruthTablePage: Component = () => {
         { name: "Hide false results", value: "FALSE" },
     ];
 
+    const [hideValues, setHideValues] = createSignal(hideOptions[0]);
+
     const sortOptions: Option[] = [
         { name: "Sort by default", value: "DEFAULT" },
         { name: "Sort by true first", value: "TRUE_FIRST" },
         { name: "Sort by false first", value: "FALSE_FIRST" },
     ];
 
-    /**
-     * The currently selected hide value, either 'none', 'true' or 'false'
-     */
-    const [hideValues, setHideValues] = createSignal(hideOptions[0]);
-
-    /**
-     * The currently selected sort value, either 'default', 'trueFirst' or 'falseFirst'
-     */
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
+
+    const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
+
+    const [error, setError] = createSignal<string | null>(null);
 
     /**
      * Updates the state of the current expression to the new search with all whitespace removed.
@@ -70,16 +75,14 @@ const TruthTablePage: Component = () => {
 
         if (exp && exp !== "") {
 
-            // TODO add loading animation
-            let result: FetchResult | undefined;
-            await fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }`)
+            setError(null);
+            setIsLoaded(false);
+            fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }
+            &hide=${ hideValues().value }&sort=${ sortValues().value }`)
                 .then(res => res.json())
-                .then(res => result = res)
-                .catch(err => console.error(err)) // TODO show error on screen
-                .finally();
-
-            // console.log(result);
-            setFetchResult(result);
+                .then(res => setFetchResult(res))
+                .catch(err => setError(err.toString()))
+                .finally(() => setIsLoaded(true));
         }
     }
 
@@ -98,7 +101,6 @@ const TruthTablePage: Component = () => {
         const el = getInputElement();
         if (el) {
             el.value = "";
-            setFetchResult(null);
             setTyping(false);
             el.focus();
         }
@@ -112,58 +114,16 @@ const TruthTablePage: Component = () => {
         getInputElement()?.focus();
     });
 
-    /**
-     * Exports the generated truth table to an excel (.xlsx) file
-     *
-     * @param type The downloaded files extension. Default is "xlsx"
-     * @param name The name of the file, excluding the extension. Default is "Truth Table"
-     * @param dl
-     * @returns {any}
-     * @author SheetJS
-     * @link https://cdn.sheetjs.com/
-     * @license Apache 2.0 License
-     * SheetJS Community Edition -- https://sheetjs.com/
-     *
-     * Copyright (C) 2012-present   SheetJS LLC
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *       http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
-    function exportToExcel(
-        {
-            type = "xlsx",
-            name = "Truth Table",
-            dl = false
-        }: { type?: BookType, name?: string, dl?: boolean }): any {
-
-        const element = document.getElementById(tableId);
-        const wb = utils.table_to_book(element, { sheet: "sheet1" });
-        return dl ?
-            write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-            writeFile(wb, name + "." + type);
-    }
-
     function _exportToExcel(): void {
         const value = (document.getElementById(filenameId) as HTMLInputElement | null)?.value;
         exportToExcel({
-            name: value !== "" ? value : undefined,
+            name: value !== "" ? value : undefined, tableId
         });
     }
 
     return (
-        <Layout title={ "Truth tables" }
-            /*containerClass={ "!max-w-full overflow-x-hidden" }
-            titleAndNavClass={ "max-w-2xl mx-auto" }
-            footerClass={ "max-w-2xl left-1/2 -translate-x-1/2" }*/>
+        <Layout title={ "Truth tables" }>
+
             <div id={ "truth-content" }>
                 <div class={ "max-w-2xl mx-auto" }>
                     <MyDisclosureContainer>
@@ -181,26 +141,30 @@ const TruthTablePage: Component = () => {
                     </MyDisclosureContainer>
 
                     <form class={ "flex-row-center" } onSubmit={ onClick } autocomplete={ "off" }>
+
                         <Input className={ `rounded-xl pl-7 h-10 w-52 sm:w-96 pr-8` }
                                id={ "truth-input" }
                                placeholder={ "¬A & B -> C" }
                                type={ "text" }
                                onChange={ onTyping }
-                               leading={ <Icon path={ magnifyingGlass } class={ "pl-1 absolute h-6" } /> }
+                               leading={ <Icon path={ magnifyingGlass } aria-label={ "Magnifying glass" }
+                                               class={ "pl-2 absolute" } /> }
                                trailing={ <Show when={ typing() } keyed>
                                    <button class={ "absolute left-44 sm:left-[22rem]" }
                                            title={ "Clear" }
                                            type={ "reset" }
                                            onClick={ clearSearch }>
-                                       <Icon path={ xMark } class={ "h-6" } />
+                                       <Icon path={ xMark } aria-label={ "The letter X" } />
                                    </button>
                                </Show> }
                         />
+
                         <Button id={ "truth-input-button" }
                                 title={ "Generate (Enter)" }
                                 type={ "submit" }
                                 className={ "min-w-50px h-10 ml-2" }
                                 children={ "Generate" } />
+
                     </form>
 
                     <Row className={ "my-1 gap-2" }>
@@ -213,11 +177,11 @@ const TruthTablePage: Component = () => {
                             <MyMenu title={ "Filter results" } id={ "filter-results" }
                                     button={
                                         <Show when={ hideValues().value !== "NONE" } children={
-                                            <Icon path={ eyeSlash }
-                                                  class={ `mx-1 h-6 w-6 ${ hideValues().value === "TRUE" ?
+                                            <Icon path={ eyeSlash } aria-label={ "An eye with a slash through it" }
+                                                  class={ `mx-1 ${ hideValues().value === "TRUE" ?
                                                       "text-green-500" : "text-red-500" }` } />
                                         } fallback={
-                                            <Icon path={ eye } class={ "mx-1 h-6 w-6" } />
+                                            <Icon path={ eye } aria-label={ "An eye" } class={ "mx-1" } />
                                         } keyed />
                                     }
                                     children={
@@ -234,7 +198,7 @@ const TruthTablePage: Component = () => {
 
                         <div class={ "h-min relative" }>
                             <MyMenu title={ "Sort results" } id={ "sort-results" }
-                                    button={ <Icon path={ funnel }
+                                    button={ <Icon path={ funnel } aria-label={ "Filter" }
                                                    class={ `h-6 w-6 ${ sortValues().value === "TRUE_FIRST" ? "text-green-500" :
                                                        sortValues().value === "FALSE_FIRST" && "text-red-500" }` } /> }
                                     children={
@@ -249,13 +213,13 @@ const TruthTablePage: Component = () => {
                             />
                         </div>
 
-                        <Show when={ fetchResult()?.expression } keyed>
+                        <Show when={ isLoaded() } keyed>
 
                             <MyDialog title={ "Download" }
                                       description={ "Export current table (.xlsx)" }
                                       button={ <>
                                           <p class={ "sr-only" }>{ "Download" }</p>
-                                          <Icon class={ "w-6 h-6" } path={ arrowDownTray } />
+                                          <Icon aria-label={ "Download" } path={ arrowDownTray } />
                                       </> }
                                       callback={ _exportToExcel }
                                       acceptButtonName={ "Download" }
@@ -271,20 +235,26 @@ const TruthTablePage: Component = () => {
                         </Show>
 
                     </Row>
-                    {
-                        fetchResult() && fetchResult()?.status.code !== 200 &&
-                        <InfoBox className={ "w-fit text-center mx-auto" }
-                                 title={ "Input error" }
-                                 error={ true }>
-                            <p>{ fetchResult()?.status.message }</p>
-                        </InfoBox>
-                    }
-                    {
-                        fetchResult()?.orderOperations && simplifyEnabled() && fetchResult()?.orderOperations.length > 0 &&
+
+                    <Show when={ isLoaded() === false } keyed>
+                        <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
+                    </Show>
+
+                    <Show when={ error() } keyed>
+                        <ErrorBox title={ "Fetch error" } error={ error() } />
+                    </Show>
+
+                    <Show when={ error() === null && isLoaded() && fetchResult()?.status.code !== 200 } keyed>
+                        <ErrorBox title={ "Input error" } error={ fetchResult()?.status.message } />
+                    </Show>
+
+                    <Show when={ simplifyEnabled() && fetchResult()?.orderOperations?.length > 0 } keyed>
+
                         <MyDisclosureContainer>
                             <MyDisclosure title={ "Show me how it's done" }>
                                 <table class={ "table" }>
                                     <tbody>
+
                                         <For each={ fetchResult()?.orderOperations }>{
                                             (operation, index) => (
                                                 <tr class={ "border-b border-dotted border-gray-500" }>
@@ -308,36 +278,36 @@ const TruthTablePage: Component = () => {
                                                 </tr>
                                             ) }
                                         </For>
+
                                     </tbody>
                                 </table>
                             </MyDisclosure>
                         </MyDisclosureContainer>
-                    }
+
+                    </Show>
+
                 </div>
-                {
-                    fetchResult()?.expression &&
-                    <>
-                        <div class={ "flex flex-row" }>
-                            {
-                                simplifyEnabled &&
-                                <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }
-                                         title={ "Output" + ":" } id={ "expression-output" }>
-                                    <p>{ fetchResult()?.after }</p>
-                                </InfoBox>
-                            }
-                        </div>
 
-                        <div class={ "flex justify-center m-2" }>
-                            <div id={ "table" } class={ "h-[45rem] overflow-auto" }>
-                                { /*TODO make sure table uses whole width and x-scrollable*/ }
-                                <TruthTable header={ fetchResult()?.header ?? undefined }
-                                            table={ fetchResult()?.table?.truthMatrix } id={ tableId } />
+                <Show when={ isLoaded() && fetchResult()?.status?.code === 200 } keyed>
+                    <Show when={ simplifyEnabled() } keyed>
+                        <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }
+                                 title={ "Output" + ":" } id={ "expression-output" }>
+                            <p>{ fetchResult()?.after }</p>
+                        </InfoBox>
+                    </Show>
 
-                            </div>
+                    <div class={ "flex justify-center m-2" }>
+                        <div id={ "table" } class={ "h-[45rem] overflow-auto" }>
+
+                            <TruthTable header={ fetchResult()?.header }
+                                        table={ fetchResult()?.table?.truthMatrix } id={ tableId } />
+
                         </div>
-                    </>
-                }
+                    </div>
+                </Show>
+
             </div>
+
         </Layout>
     );
 }
@@ -347,19 +317,29 @@ export default TruthTablePage;
 interface SingleMenuItem {
     option: Option,
     currentValue?: Accessor<Option>,
-    onClick: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>,
+    onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
 }
 
-// TODO not rerendering when currentValue changes
 const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onClick }) => {
+    const isSelected = () => currentValue()?.value === option.value;
     return (
-        <div class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
-             onClick={ onClick }>
-            <Icon path={ check }
-                  class={ `h-6 w-6 text-white ${ currentValue().value !== option.value && "text-transparent" }` } />
+        <button class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
+                onClick={ onClick }>
+            <Icon path={ check } aria-label={ isSelected() ? "A checkmark" : "Nothing" }
+                  class={ `text-white ${ !isSelected() && "text-transparent" }` } />
             { option.name }
-        </div>
+        </button>
     );
+}
+
+const ErrorBox: Component<{ title: string, error: string }> = ({ title, error }) => {
+    return (
+        <InfoBox className={ "w-fit text-center mx-auto" }
+                 title={ title }
+                 error={ true }>
+            <p>{ error }</p>
+        </InfoBox>
+    )
 }
 
 render(() => <TruthTablePage />, document.getElementById("root") as HTMLElement);
