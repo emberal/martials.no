@@ -41,4 +41,8 @@
         @apply list-disc ml-4;
     }
 
+    svg {
+        @apply pointer-events-none h-6 w-6;
+    }
+
 }
