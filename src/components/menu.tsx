@@ -40,24 +40,32 @@ const MyMenu: Component<MenuProps> = (
             }
         }
 
+        function keypress(e: KeyboardEvent): void {
+            if (e.key === "Escape") {
+                closeMenu();
+            }
+        }
+
         if (isOpen()) {
             document.addEventListener("click", click);
+            document.addEventListener("keyup", keypress);
         }
         else {
             document.removeEventListener("click", click);
+            document.removeEventListener("keyup", keypress);
         }
     });
 
     return ( // TODO transition
         <div class={ `${ className }` } id={ id }>
 
-            <Button title={ title ?? undefined }
+            <Button title={ title }
                     onClick={ toggleMenu }
                     className={ `flex-row-center ${ buttonClassName }` }>
                 { button }
             </Button>
 
-            <Show when={isOpen()} keyed>
+            <Show when={ isOpen() } keyed>
                 <div
                     class={ `absolute bg-default-bg border border-gray-500 rounded-b-xl mt-1 w-max z-50 ${ itemsClassName }` }>
                     <div class={ "mx-1" }>{ children }</div>
