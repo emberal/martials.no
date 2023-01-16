@@ -77,7 +77,7 @@ const TruthTablePage: Component = () => {
 
             setError(null);
             setIsLoaded(false);
-            fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ exp }&simplify=${ simplifyEnabled() }
+            fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
             &hide=${ hideValues().value }&sort=${ sortValues().value }`)
                 .then(res => res.json())
                 .then(res => setFetchResult(res))
@@ -86,18 +86,18 @@ const TruthTablePage: Component = () => {
         }
     }
 
-    function getInputElement() {
+    function getInputElement(): HTMLInputElement | null {
         return document.getElementById(inputId) as HTMLInputElement | null;
     }
 
-    function onTyping() {
+    function onTyping(): void {
         const el = getInputElement();
         if (el && (el.value !== "") !== typing()) {
             setTyping(el.value !== "");
         }
     }
 
-    function clearSearch() {
+    function clearSearch(): void {
         const el = getInputElement();
         if (el) {
             el.value = "";
@@ -109,7 +109,7 @@ const TruthTablePage: Component = () => {
     const tableId = "truth-table";
     const filenameId = "excel-filename";
 
-    onMount(() => {
+    onMount((): void => {
         // Focuses searchbar on load
         getInputElement()?.focus();
     });
