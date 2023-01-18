@@ -5,6 +5,7 @@ export interface SimpleProps {
     className?: string,
     style?: JSX.CSSProperties,
     id?: string,
+    title?: string,
 }
 
 export interface ChildProps extends SimpleProps {

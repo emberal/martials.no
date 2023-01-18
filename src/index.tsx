@@ -29,6 +29,11 @@ const cards = [
         title: "Hjemmeside",
         children: <p>Sjekk ut mine andre prosjekter</p>,
         to: "https://h600878.github.io/",
+    },
+    {
+        title: "Forenkle sannhetsverdier",
+        children: <p>Implementering av API</p>,
+        to: `/simplify-truths.html`,
     }
 ] satisfies CardProps[];
 
