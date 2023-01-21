@@ -83,7 +83,7 @@ const TruthTablePage: Component = () => {
         if (exp !== "") {
             setError(null);
             setIsLoaded(false);
-            fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
+            fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
             &hide=${ hideValues().value }&sort=${ sortValues().value }`)
                 .then(res => res.json())
                 .then(res => setFetchResult(res))
