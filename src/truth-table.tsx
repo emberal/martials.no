@@ -67,7 +67,10 @@ const TruthTablePage: Component = () => {
      */
     function onClick(e: { preventDefault: () => void; }): void {
         e.preventDefault(); // Stops the page from reloading onClick
-        const exp = getInputElement()?.value;
+        let exp = getInputElement()?.value;
+
+        exp = exp.replaceAll("|", "/")
+
         if (exp) {
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }`);
             getFetchResult(exp).then(null);
@@ -143,15 +146,34 @@ const TruthTablePage: Component = () => {
                 <div class={ "max-w-2xl mx-auto" }>
                     <MyDisclosureContainer>
                         <MyDisclosure title={ "How to" }>
-                            <p>{ "truthTableHowTo" /*TODO*/ }</p>
+                            <p>{ `Fill in a truth expression and it will be simplified for you as much as possible.
+                            It will also genereate a truth table with all possible values. You can use a single letter,
+                             word or multiple words without spacing for each atomic value. 
+                            If you do not want to simplify the expression, simply turn off the toggle.
+                            Keywords for operators are defined below. Parentheses is also allowed` }</p>
                         </MyDisclosure>
                         <MyDisclosure title={ "Keywords" }>
-                            <>
-                                <p>not</p>
-                                <p>and</p>
-                                <p>or</p>
-                                <p>implication</p>
-                            </>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Not:</td>
+                                        <td>!</td>
+                                    </tr>
+                                    <tr>
+                                        <td>And:</td>
+                                        <td>&</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Or:</td>
+                                        <td>|</td>
+                                        <td>/</td>
+                                    </tr>
+                                    <tr>
+                                        <td class={ "pr-2" }>Implication:</td>
+                                        <td>{ "->" }</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </MyDisclosure>
                     </MyDisclosureContainer>
 
