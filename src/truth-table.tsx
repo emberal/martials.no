@@ -57,7 +57,7 @@ const TruthTablePage: Component = () => {
 
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
 
-    const [isLoaded, setIsLoaded] = createSignal(true);
+    const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
 
     const [error, setError] = createSignal<string | null>(null);
 
@@ -68,16 +68,16 @@ const TruthTablePage: Component = () => {
     function onClick(e: { preventDefault: () => void; }): void {
         e.preventDefault(); // Stops the page from reloading onClick
         const exp = getInputElement()?.value;
-
-        history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }`);
-
-        getFetchResult(exp).then(null);
+        if (exp) {
+            history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }`);
+            getFetchResult(exp).then(null);
+        }
     }
 
-    async function getFetchResult(exp: string | null): Promise<void> {
+    async function getFetchResult(exp: string): Promise<void> {
         setFetchResult(null);
 
-        if (exp && exp !== "") {
+        if (exp !== "") {
             setError(null);
             setIsLoaded(false);
             fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
@@ -107,6 +107,7 @@ const TruthTablePage: Component = () => {
         if (el) {
             el.value = "";
             setTyping(false);
+            history.replaceState(null, "", location.pathname);
             el.focus();
         }
     }
@@ -118,8 +119,10 @@ const TruthTablePage: Component = () => {
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.has("exp")) {
             const exp = searchParams.get("exp");
-            getInputElement().value = exp;
-            getFetchResult(exp).then(null);
+            if (exp !== "") {
+                getInputElement().value = exp;
+                getFetchResult(exp).then(null);
+            }
         }
 
         // Focuses searchbar on load
@@ -248,7 +251,7 @@ const TruthTablePage: Component = () => {
 
                     </Row>
 
-                    <Show when={ !isLoaded() } keyed>
+                    <Show when={ isLoaded() === false } keyed>
                         <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
                     </Show>
 
