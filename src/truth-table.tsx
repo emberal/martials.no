@@ -28,8 +28,6 @@ type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TR
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
 
-    const inputId = "truth-input";
-
     /**
      * Stores the boolean value of the simplify toggle
      */
@@ -59,7 +57,7 @@ const TruthTablePage: Component = () => {
 
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
 
-    const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
+    const [isLoaded, setIsLoaded] = createSignal(true);
 
     const [error, setError] = createSignal<string | null>(null);
 
@@ -67,14 +65,19 @@ const TruthTablePage: Component = () => {
      * Updates the state of the current expression to the new search with all whitespace removed.
      * If the element is not found, reset.
      */
-    async function onClick(e: { preventDefault: () => void; }): Promise<void> {
+    function onClick(e: { preventDefault: () => void; }): void {
         e.preventDefault(); // Stops the page from reloading onClick
-        const exp = (document.getElementById(inputId) as HTMLInputElement | null)?.value;
+        const exp = getInputElement()?.value;
 
+        history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }`);
+
+        getFetchResult(exp).then(null);
+    }
+
+    async function getFetchResult(exp: string | null): Promise<void> {
         setFetchResult(null);
 
         if (exp && exp !== "") {
-
             setError(null);
             setIsLoaded(false);
             fetch(`https://api.martials.no/simplify-truths/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
@@ -85,6 +88,8 @@ const TruthTablePage: Component = () => {
                 .finally(() => setIsLoaded(true));
         }
     }
+
+    const inputId = "truth-input";
 
     function getInputElement(): HTMLInputElement | null {
         return document.getElementById(inputId) as HTMLInputElement | null;
@@ -110,6 +115,13 @@ const TruthTablePage: Component = () => {
     const filenameId = "excel-filename";
 
     onMount((): void => {
+        const searchParams = new URLSearchParams(location.search);
+        if (searchParams.has("exp")) {
+            const exp = searchParams.get("exp");
+            getInputElement().value = exp;
+            getFetchResult(exp).then(null);
+        }
+
         // Focuses searchbar on load
         getInputElement()?.focus();
     });
@@ -236,7 +248,7 @@ const TruthTablePage: Component = () => {
 
                     </Row>
 
-                    <Show when={ isLoaded() === false } keyed>
+                    <Show when={ !isLoaded() } keyed>
                         <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
                     </Show>
 
