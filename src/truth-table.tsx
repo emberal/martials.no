@@ -22,6 +22,7 @@ import {
 import { Button, MySwitch } from "./components/button";
 import MyDialog from "./components/dialog";
 import { exportToExcel } from "./functions/export";
+import { Link } from "./components/link";
 
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
@@ -146,11 +147,12 @@ const TruthTablePage: Component = () => {
                 <div class={ "max-w-2xl mx-auto" }>
                     <MyDisclosureContainer>
                         <MyDisclosure title={ "How to" }>
-                            <p>{ `Fill in a truth expression and it will be simplified for you as much as possible.
+                            <p>Fill in a truth expression and it will be simplified for you as much as possible.
                             It will also genereate a truth table with all possible values. You can use a single letter,
                              word or multiple words without spacing for each atomic value. 
                             If you do not want to simplify the expression, simply turn off the toggle.
-                            Keywords for operators are defined below. Parentheses is also allowed` }</p>
+                            Keywords for operators are defined below. Parentheses is also allowed.</p>
+                            <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.</p>
                         </MyDisclosure>
                         <MyDisclosure title={ "Keywords" }>
                             <table>
@@ -286,41 +288,7 @@ const TruthTablePage: Component = () => {
                     </Show>
 
                     <Show when={ simplifyEnabled() && fetchResult()?.orderOperations?.length > 0 } keyed>
-
-                        <MyDisclosureContainer>
-                            <MyDisclosure title={ "Show me how it's done" }>
-                                <table class={ "table" }>
-                                    <tbody>
-
-                                        <For each={ fetchResult()?.orderOperations }>{
-                                            (operation, index) => (
-                                                <tr class={ "border-b border-dotted border-gray-500" }>
-                                                    <td>{ index() + 1 }:</td>
-                                                    <td class={ "px-2" }>{
-
-                                                        <For each={ diffChars(operation.before, operation.after) }>
-                                                            { (part) => (
-                                                                <span class={
-                                                                    `${ part.added && "bg-green-700" }
-                                                                    ${ part.removed && "bg-red-700" }` }>
-                                                                { part.value }
-                                                            </span>) }
-                                                        </For> }
-
-                                                        { typeof window !== "undefined" && window.outerWidth <= 640 &&
-                                                            <p>{ "using" }: { operation.law }</p> }
-                                                    </td>
-                                                    { typeof window !== "undefined" && window.outerWidth > 640 &&
-                                                        <td>{ "using" }: { operation.law }</td> }
-                                                </tr>
-                                            ) }
-                                        </For>
-
-                                    </tbody>
-                                </table>
-                            </MyDisclosure>
-                        </MyDisclosureContainer>
-
+                        <ShowMeHow fetchResult={ fetchResult } />
                     </Show>
 
                 </div>
@@ -328,7 +296,7 @@ const TruthTablePage: Component = () => {
                 <Show when={ isLoaded() && fetchResult()?.status?.code === 200 } keyed>
                     <Show when={ simplifyEnabled() } keyed>
                         <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }
-                                 title={ "Output" + ":" } id={ "expression-output" }>
+                                 title={ "Output:" } id={ "expression-output" }>
                             <p>{ fetchResult()?.after }</p>
                         </InfoBox>
                     </Show>
@@ -376,6 +344,55 @@ const ErrorBox: Component<{ title: string, error: string }> = ({ title, error })
                  error={ true }>
             <p>{ error }</p>
         </InfoBox>
+    )
+}
+
+interface ShowMeHowProps {
+    fetchResult: Accessor<FetchResult>,
+}
+
+const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => {
+    return (
+        <MyDisclosureContainer>
+            <MyDisclosure title={ "Show me how it's done" }>
+                <table class={ "table" }>
+                    <tbody>
+
+                        <For each={ fetchResult()?.orderOperations }>{
+                            (operation, index) => (
+                                <tr class={ "border-b border-dotted border-gray-500" }>
+                                    <td>{ index() + 1 }:</td>
+                                    <td class={ "px-2" }>{
+
+                                        <For each={ diffChars(operation.before, operation.after) }>
+                                            { (part) => (
+                                                <span class={
+                                                    `${ part.added && "bg-green-700" }
+                                                                    ${ part.removed && "bg-red-700" }` }>
+                                                                { part.value }
+                                                            </span>) }
+                                        </For> }
+
+                                        <Show
+                                            when={ typeof window !== "undefined" && window.outerWidth <= 640 }
+                                            keyed>
+                                            <p>{ "using" }: { operation.law }</p>
+                                        </Show>
+
+                                    </td>
+                                    <Show
+                                        when={ typeof window !== "undefined" && window.outerWidth > 640 }
+                                        keyed>
+                                        <td>{ "using" }: { operation.law }</td>
+                                    </Show>
+                                </tr>
+                            ) }
+                        </For>
+
+                    </tbody>
+                </table>
+            </MyDisclosure>
+        </MyDisclosureContainer>
     )
 }
 
