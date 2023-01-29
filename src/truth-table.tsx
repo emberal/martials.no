@@ -29,10 +29,19 @@ type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TR
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
 
+    let searchParams: URLSearchParams;
+    let simplifyDefault = true
+    if (typeof location !== "undefined") {
+        searchParams = new URLSearchParams(location.search);
+        if (searchParams.has("simplify")) {
+            simplifyDefault = searchParams.get("simplify") === "true";
+        }
+    }
+
     /**
      * Stores the boolean value of the simplify toggle
      */
-    const [simplifyEnabled, setSimplifyEnabled] = createSignal(true);
+    const [simplifyEnabled, setSimplifyEnabled] = createSignal(simplifyDefault);
     /**
      * The state element used to store the simplified string, "empty string" by default
      */
@@ -73,7 +82,8 @@ const TruthTablePage: Component = () => {
         exp = exp.replaceAll("|", "/")
 
         if (exp) {
-            history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }`);
+            history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
+hide=${ hideValues().value }&sort=${ sortValues().value }`);
             getFetchResult(exp).then(null);
         }
     }
@@ -84,8 +94,8 @@ const TruthTablePage: Component = () => {
         if (exp !== "") {
             setError(null);
             setIsLoaded(false);
-            fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }
-            &hide=${ hideValues().value }&sort=${ sortValues().value }`)
+            fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&
+simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false`)
                 .then(res => res.json())
                 .then(res => setFetchResult(res))
                 .catch(err => setError(err.toString()))
@@ -120,13 +130,21 @@ const TruthTablePage: Component = () => {
     const filenameId = "excel-filename";
 
     onMount((): void => {
-        const searchParams = new URLSearchParams(location.search);
         if (searchParams.has("exp")) {
             const exp = searchParams.get("exp");
             if (exp !== "") {
                 getInputElement().value = exp;
-                getFetchResult(exp).then(null);
             }
+            const hide = searchParams.get("hide");
+            if (hide) {
+                setHideValues(hideOptions.find(o => o.value === hide) ?? hideOptions[0]);
+            }
+            const sort = searchParams.get("sort");
+            if (sort) {
+                setSortValues(sortOptions.find(o => o.value === sort) ?? sortOptions[0]);
+            }
+
+            getFetchResult(exp).then(null);
         }
 
         // Focuses searchbar on load
@@ -148,11 +166,13 @@ const TruthTablePage: Component = () => {
                     <MyDisclosureContainer>
                         <MyDisclosure title={ "How to" }>
                             <p>Fill in a truth expression and it will be simplified for you as much as possible.
-                            It will also genereate a truth table with all possible values. You can use a single letter,
-                             word or multiple words without spacing for each atomic value. 
-                            If you do not want to simplify the expression, simply turn off the toggle.
-                            Keywords for operators are defined below. Parentheses is also allowed.</p>
-                            <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.</p>
+                               It will also genereate a truth table with all possible values. You can use a single
+                               letter,
+                               word or multiple words without spacing for each atomic value.
+                               If you do not want to simplify the expression, simply turn off the toggle.
+                               Keywords for operators are defined below. Parentheses is also allowed.</p>
+                            <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.
+                            </p>
                         </MyDisclosure>
                         <MyDisclosure title={ "Keywords" }>
                             <table>
@@ -208,6 +228,7 @@ const TruthTablePage: Component = () => {
 
                     <Row className={ "my-1 gap-2" }>
                         <span class={ "h-min" }>{ "Simplify" }: </span>
+
                         <MySwitch onChange={ setSimplifyEnabled } defaultValue={ simplifyEnabled() }
                                   title={ "Simplify" }
                                   name={ "Turn on/off simplify expressions" } className={ "mx-1" } />
