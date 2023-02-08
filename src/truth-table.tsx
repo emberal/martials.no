@@ -79,7 +79,7 @@ const TruthTablePage: Component = () => {
         e.preventDefault(); // Stops the page from reloading onClick
         let exp = getInputElement()?.value;
 
-        exp = exp.replaceAll("|", "/")
+        exp = exp.replaceAll("|", "/").trimEnd();
 
         if (exp) {
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
