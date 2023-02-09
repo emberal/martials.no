@@ -174,29 +174,9 @@ simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues(
                             <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.
                             </p>
                         </MyDisclosure>
-                        <MyDisclosure title={ "Keywords" }>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>Not:</td>
-                                        <td>!</td>
-                                    </tr>
-                                    <tr>
-                                        <td>And:</td>
-                                        <td>&</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Or:</td>
-                                        <td>|</td>
-                                        <td>/</td>
-                                    </tr>
-                                    <tr>
-                                        <td class={ "pr-2" }>Implication:</td>
-                                        <td>{ "->" }</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </MyDisclosure>
+
+                        <KeywordsDisclosure />
+
                     </MyDisclosureContainer>
 
                     <form class={ "flex-row-center" } onSubmit={ onClick } autocomplete={ "off" }>
@@ -416,5 +396,33 @@ const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => {
         </MyDisclosureContainer>
     )
 }
+
+const KeywordsDisclosure = () => {
+    return (
+        <MyDisclosure title={ "Keywords" }>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Not:</td>
+                        <td>!</td>
+                    </tr>
+                    <tr>
+                        <td>And:</td>
+                        <td>&</td>
+                    </tr>
+                    <tr>
+                        <td>Or:</td>
+                        <td>|</td>
+                        <td>/</td>
+                    </tr>
+                    <tr>
+                        <td class={ "pr-2" }>Implication:</td>
+                        <td>{ "->" }</td>
+                    </tr>
+                </tbody>
+            </table>
+        </MyDisclosure>
+    );
+};
 
 render(() => <TruthTablePage />, document.getElementById("root") as HTMLElement);
