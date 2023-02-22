@@ -40,6 +40,7 @@ interface Input<T> extends InputProps<T> {
     leading?: JSX.Element,
     trailing?: JSX.Element,
     onChange?: () => void,
+    inputClass?: string,
 }
 
 export const Input: Component<Input<HTMLInputElement>> = (
@@ -53,7 +54,8 @@ export const Input: Component<Input<HTMLInputElement>> = (
         required = false,
         onChange,
         leading,
-        trailing
+        trailing,
+        inputClass
     }): JSX.Element => {
 
     /**
@@ -76,12 +78,12 @@ export const Input: Component<Input<HTMLInputElement>> = (
     });
 
     return (
-        <Row className={ "relative" }>
+        <Row className={ `relative ${ className }` }>
             { leading }
             <HoverTitle title={ title } isActive={ isFocused() || isHover() || isText() } htmlFor={ id } />
             <input
                 class={ `bg-default-bg focus:border-cyan-500 outline-none border-2 border-gray-500 
-                hover:border-t-cyan-400 ${ className }` }
+                hover:border-t-cyan-400 ${ inputClass }` }
                 id={ id }
                 onFocus={ () => setIsFocused(true) }
                 onBlur={ () => setIsFocused(false) }

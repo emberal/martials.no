@@ -30,11 +30,16 @@ type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TR
 const TruthTablePage: Component = () => {
 
     let searchParams: URLSearchParams;
-    let simplifyDefault = true
+    let simplifyDefault = true, inputContent = false;
+
     if (typeof location !== "undefined") {
         searchParams = new URLSearchParams(location.search);
+
         if (searchParams.has("simplify")) {
             simplifyDefault = searchParams.get("simplify") === "true";
+        }
+        if (searchParams.has("exp")) {
+            inputContent = true;
         }
     }
 
@@ -49,7 +54,7 @@ const TruthTablePage: Component = () => {
     /**
      * If the searchbar is empty, this state is 'false', otherwise 'true'
      */
-    const [typing, setTyping] = createSignal(false);
+    const [typing, setTyping] = createSignal(inputContent);
 
     const hideOptions: Option[] = [
         { name: "Show all result", value: "NONE" },
@@ -67,6 +72,8 @@ const TruthTablePage: Component = () => {
 
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
 
+    const [hideIntermediates, setHideIntermediates] = createSignal(false);
+
     const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
 
     const [error, setError] = createSignal<string | null>(null);
@@ -83,19 +90,21 @@ const TruthTablePage: Component = () => {
 
         if (exp) {
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
-hide=${ hideValues().value }&sort=${ sortValues().value }`);
-            getFetchResult(exp).then(null);
+hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
+            getFetchResult(exp);
         }
     }
 
-    async function getFetchResult(exp: string): Promise<void> {
+    function getFetchResult(exp: string): void {
         setFetchResult(null);
 
         if (exp !== "") {
             setError(null);
             setIsLoaded(false);
+
             fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&
-simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false`)
+simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false&
+hideIntermediate=${ hideIntermediates() }`)
                 .then(res => res.json())
                 .then(res => setFetchResult(res))
                 .catch(err => setError(err.toString()))
@@ -143,8 +152,12 @@ simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues(
             if (sort) {
                 setSortValues(sortOptions.find(o => o.value === sort) ?? sortOptions[0]);
             }
+            const hideIntermediate = searchParams.get("hideIntermediate");
+            if (hideIntermediate) {
+                setHideIntermediates(hideIntermediate === "true");
+            }
 
-            getFetchResult(exp).then(null);
+            getFetchResult(exp);
         }
 
         // Focuses searchbar on load
@@ -181,7 +194,7 @@ simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues(
 
                     <form class={ "flex-row-center" } onSubmit={ onClick } autocomplete={ "off" }>
 
-                        <Input className={ `rounded-xl pl-7 h-10 w-52 sm:w-96 pr-8` }
+                        <Input inputClass={ `rounded-xl pl-7 h-10 w-full pr-8` } className={ "w-full" }
                                id={ "truth-input" }
                                placeholder={ "¬A & B -> C" }
                                type={ "text" }
@@ -189,7 +202,7 @@ simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues(
                                leading={ <Icon path={ magnifyingGlass } aria-label={ "Magnifying glass" }
                                                class={ "pl-2 absolute" } /> }
                                trailing={ <Show when={ typing() } keyed>
-                                   <button class={ "absolute left-44 sm:left-[22rem]" }
+                                   <button class={ "absolute right-2" }
                                            title={ "Clear" }
                                            type={ "reset" }
                                            onClick={ clearSearch }>
