@@ -341,11 +341,12 @@ interface SingleMenuItem {
 
 const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onClick }) => {
     const isSelected = () => currentValue()?.value === option.value;
+    console.log(currentValue()?.value, option.value, isSelected());
     return (
         <button class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
                 onClick={ onClick }>
             <Icon path={ check } aria-label={ isSelected() ? "A checkmark" : "Nothing" }
-                  class={ `text-white ${ !isSelected() && "text-transparent" }` } />
+                  class={ `text-white ${ !isSelected() && "invisible" }` } />
             { option.name }
         </button>
     );
