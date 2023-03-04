@@ -86,11 +86,12 @@ const TruthTablePage: Component = () => {
         e.preventDefault(); // Stops the page from reloading onClick
         let exp = getInputElement()?.value;
 
-        exp = exp.replaceAll("|", "/").trimEnd();
-
         if (exp) {
+            exp = exp.replaceAll("|", "/").trimEnd();
+
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
 hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
+
             getFetchResult(exp);
         }
     }
@@ -341,7 +342,6 @@ interface SingleMenuItem {
 
 const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onClick }) => {
     const isSelected = () => currentValue()?.value === option.value;
-    console.log(currentValue()?.value, option.value, isSelected());
     return (
         <button class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
                 onClick={ onClick }>
