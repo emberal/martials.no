@@ -220,6 +220,7 @@ hideIntermediate=${ hideIntermediates() }`)
 
                     </form>
 
+                    { /* Options row */ }
                     <Row className={ "my-1 gap-2" }>
                         <span class={ "h-min" }>{ "Simplify" }: </span>
 
@@ -266,6 +267,10 @@ hideIntermediate=${ hideIntermediates() }`)
                                     itemsClassName={ "right-0" }
                             />
                         </div>
+
+                        <MySwitch title={ "Hide intermediate values" }
+                                  onChange={ setHideIntermediates }
+                                  defaultValue={ hideIntermediates() } />
 
                         <Show when={ isLoaded() } keyed>
 
