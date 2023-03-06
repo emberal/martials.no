@@ -30,7 +30,7 @@ type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TR
 const TruthTablePage: Component = () => {
 
     let searchParams: URLSearchParams;
-    let simplifyDefault = true, inputContent = false;
+    let simplifyDefault = true, inputContent = false, hideIntermediate = false;
 
     if (typeof location !== "undefined") {
         searchParams = new URLSearchParams(location.search);
@@ -41,7 +41,9 @@ const TruthTablePage: Component = () => {
         if (searchParams.has("exp")) {
             inputContent = true;
         }
-    }
+            if (searchParams.has("hideIntermediate")) {
+                hideIntermediate = searchParams.get("hideIntermediate") === "true";
+            }    }
 
     /**
      * Stores the boolean value of the simplify toggle
@@ -72,7 +74,7 @@ const TruthTablePage: Component = () => {
 
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
 
-    const [hideIntermediates, setHideIntermediates] = createSignal(false);
+    const [hideIntermediates, setHideIntermediates] = createSignal(hideIntermediate);
 
     const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
 
@@ -152,10 +154,6 @@ hideIntermediate=${ hideIntermediates() }`)
             const sort = searchParams.get("sort");
             if (sort) {
                 setSortValues(sortOptions.find(o => o.value === sort) ?? sortOptions[0]);
-            }
-            const hideIntermediate = searchParams.get("hideIntermediate");
-            if (hideIntermediate) {
-                setHideIntermediates(hideIntermediate === "true");
             }
 
             getFetchResult(exp);
