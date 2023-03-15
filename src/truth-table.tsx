@@ -23,6 +23,7 @@ import { Button, MySwitch } from "./components/button";
 import MyDialog from "./components/dialog";
 import { exportToExcel } from "./functions/export";
 import { Link } from "./components/link";
+import { isTouch } from "./functions/touch";
 
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
@@ -41,9 +42,10 @@ const TruthTablePage: Component = () => {
         if (searchParams.has("exp")) {
             inputContent = true;
         }
-            if (searchParams.has("hideIntermediate")) {
-                hideIntermediate = searchParams.get("hideIntermediate") === "true";
-            }    }
+        if (searchParams.has("hideIntermediate")) {
+            hideIntermediate = searchParams.get("hideIntermediate") === "true";
+        }
+    }
 
     /**
      * Stores the boolean value of the simplify toggle
@@ -160,7 +162,9 @@ hideIntermediate=${ hideIntermediates() }`)
         }
 
         // Focuses searchbar on load
-        getInputElement()?.focus();
+        if (!isTouch()) {
+            getInputElement()?.focus();
+        }
     });
 
     function _exportToExcel(): void {
