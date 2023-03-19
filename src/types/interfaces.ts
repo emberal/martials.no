@@ -58,10 +58,7 @@ export type OrderOfOperations = {
 }[];
 
 export type FetchResult = {
-    status: {
-        code: number,
-        message: string,
-    },
+    status: string,
     before: string,
     after: string,
     orderOperations: OrderOfOperations | null,

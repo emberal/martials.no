@@ -25,6 +25,10 @@ import { exportToExcel } from "./functions/export";
 import { Link } from "./components/link";
 import { isTouch } from "./functions/touch";
 
+const endpoint = "https://api.martials.no/simplify-truths/do/simplify/table";
+const localhost = "http://localhost:8080/simplify/table";
+const useDev = true;
+
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
 // TODO move some code to new components
@@ -80,7 +84,7 @@ const TruthTablePage: Component = () => {
 
     const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
 
-    const [error, setError] = createSignal<string | null>(null);
+    const [error, setError] = createSignal<{ title: string, message: string } | null>(null);
 
     /**
      * Updates the state of the current expression to the new search with all whitespace removed.
@@ -107,12 +111,17 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
             setError(null);
             setIsLoaded(false);
 
-            fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&
+            fetch(`${ useDev ? localhost : endpoint }/${ encodeURIComponent(exp) }?
 simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false&
 hideIntermediate=${ hideIntermediates() }`)
                 .then(res => res.json())
-                .then(res => setFetchResult(res))
-                .catch(err => setError(err.toString()))
+                .then(res => {
+                    if (res.status !== "OK" && !res.ok) {
+                        return setError({ title: "Input error", message: res.message });
+                    }
+                    return setFetchResult(res);
+                })
+                .catch(err => setError({ title: "Fetch error", message: err.toString() }))
                 .finally(() => setIsLoaded(true));
         }
     }
@@ -301,12 +310,9 @@ hideIntermediate=${ hideIntermediates() }`)
                         <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
                     </Show>
 
-                    <Show when={ error() } keyed>
-                        <ErrorBox title={ "Fetch error" } error={ error() } />
-                    </Show>
-
-                    <Show when={ error() === null && isLoaded() && fetchResult()?.status.code !== 200 } keyed>
-                        <ErrorBox title={ "Input error" } error={ fetchResult()?.status.message } />
+                    <Show when={ error() && isLoaded() } keyed>
+                        <ErrorBox title={ error().title ?? "Error" }
+                                  error={ error().message ?? "Something went wrong" } />
                     </Show>
 
                     <Show when={ simplifyEnabled() && fetchResult()?.orderOperations?.length > 0 } keyed>
@@ -315,7 +321,7 @@ hideIntermediate=${ hideIntermediates() }`)
 
                 </div>
 
-                <Show when={ isLoaded() && fetchResult()?.status?.code === 200 } keyed>
+                <Show when={ isLoaded() && error() === null } keyed>
                     <Show when={ simplifyEnabled() } keyed>
                         <InfoBox className={ "w-fit mx-auto pb-1 text-lg text-center" }
                                  title={ "Output:" } id={ "expression-output" }>
