@@ -71,3 +71,16 @@ export type FetchResult = {
         truthMatrix: Table,
     } | null,
 };
+
+export type WebWorkerProps = {
+    expression: string,
+    simplifyEnabled: boolean,
+    hideValue: string,
+    sortValue: string,
+    hideIntermediates: boolean
+};
+
+export type FetchResultsProps = {
+    fetchResult: FetchResult | null,
+    error: string | null,
+}

@@ -6,7 +6,7 @@ import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
 import { diffChars } from "diff";
 import MyMenu from "./components/menu";
-import type { FetchResult } from "./types/interfaces";
+import type { FetchResultsProps, FetchResult, WebWorkerProps } from "./types/interfaces";
 import { type Accessor, type Component, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
@@ -107,13 +107,40 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
             setError(null);
             setIsLoaded(false);
 
-            fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&
+            if (window.Worker) {
+                const worker = new Worker(new URL("./functions/fetch.ts", import.meta.url));
+
+                const input: WebWorkerProps = {
+                    expression: exp,
+                    simplifyEnabled: simplifyEnabled(),
+                    hideValue: hideValues().value,
+                    sortValue: sortValues().value,
+                    hideIntermediates: hideIntermediates()
+                };
+
+                worker.postMessage(input);
+
+                worker.onmessage = (e): void => {
+                    const data: FetchResultsProps = e.data;
+                    setIsLoaded(true);
+                    if (data.fetchResult) {
+                        setFetchResult(data.fetchResult);
+                    }
+                    else if (data.error) {
+                        setError(data.error);
+                    }
+                    worker.terminate();
+                };
+            }
+            else {
+                fetch(`https://api.martials.no/simplify-truths/do/simplify/table?exp=${ encodeURIComponent(exp) }&
 simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false&
 hideIntermediate=${ hideIntermediates() }`)
-                .then(res => res.json())
-                .then(res => setFetchResult(res))
-                .catch(err => setError(err.toString()))
-                .finally(() => setIsLoaded(true));
+                    .then(res => res.json())
+                    .then(res => setFetchResult(res))
+                    .catch(err => setError(err.toString()))
+                    .finally(() => setIsLoaded(true));
+            }
         }
     }
 
