@@ -120,8 +120,8 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
 
                 worker.postMessage(input);
 
-                worker.onmessage = (e): void => {
-                    const data: FetchResultsProps = e.data;
+                worker.onmessage = (e: MessageEvent<FetchResultsProps>): void => {
+                    const data = e.data;
                     setIsLoaded(true);
                     if (data.fetchResult) {
                         setFetchResult(data.fetchResult);

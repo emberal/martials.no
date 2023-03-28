@@ -1,9 +1,15 @@
 /* @refresh reload */
 import type { FetchResultsProps, WebWorkerProps } from '../types/interfaces';
 
-onmessage = async (e) => {
+onmessage = async (e: MessageEvent<WebWorkerProps>) => {
     console.log("Worker: Message received from main script")
-    const { expression, simplifyEnabled, hideValue, sortValue, hideIntermediates }: WebWorkerProps = e.data;
+    const {
+        expression,
+        simplifyEnabled,
+        hideValue,
+        sortValue,
+        hideIntermediates
+    } = e.data;
 
     const result: FetchResultsProps = {
         fetchResult: null,
