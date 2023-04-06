@@ -25,10 +25,6 @@ import { exportToExcel } from "./functions/export";
 import { Link } from "./components/link";
 import { isTouch } from "./functions/touch";
 
-const endpoint = "https://api.martials.no/simplify-truths/do/simplify/table";
-const localhost = "http://localhost:8080/simplify/table";
-const useDev = true;
-
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
 // TODO move some code to new components
@@ -95,7 +91,7 @@ const TruthTablePage: Component = () => {
         let exp = getInputElement()?.value;
 
         if (exp) {
-            exp = exp.replaceAll("|", "/").trimEnd();
+            exp = exp.replaceAll("|", ":").trimEnd();
 
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
 hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
@@ -110,8 +106,8 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
         if (exp !== "") {
             setError(null);
             setIsLoaded(false);
-
-            fetch(`${ useDev ? localhost : endpoint }/${ encodeURIComponent(exp) }?
+// TODO add button on DEV to switch between local and remote
+            fetch(`${ import.meta.env.VITE_FETCH_FULL }${ encodeURIComponent(exp) }?
 simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false&
 hideIntermediate=${ hideIntermediates() }`)
                 .then(res => res.json())
