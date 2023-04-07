@@ -27,6 +27,11 @@ import { isTouch } from "./functions/touch";
 
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
+const fetchUrls = [
+    "http://localhost:8080/simplify/table/",
+    "https://api.martials.no/simplify-truths/do/simplify/table/"
+];
+
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
 
@@ -82,6 +87,8 @@ const TruthTablePage: Component = () => {
 
     const [error, setError] = createSignal<{ title: string, message: string } | null>(null);
 
+    const [useLocalhost, setUseLocalhost] = createSignal(false);
+
     /**
      * Updates the state of the current expression to the new search with all whitespace removed.
      * If the element is not found, reset.
@@ -106,8 +113,8 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
         if (exp !== "") {
             setError(null);
             setIsLoaded(false);
-// TODO add button on DEV to switch between local and remote
-            fetch(`${ import.meta.env.VITE_FETCH_FULL }${ encodeURIComponent(exp) }?
+
+            fetch(`${ fetchUrls[useLocalhost() ? 0 : 1] }${ encodeURIComponent(exp) }?
 simplify=${ simplifyEnabled() }&hide=${ hideValues().value }&sort=${ sortValues().value }&caseSensitive=false&
 hideIntermediate=${ hideIntermediates() }`)
                 .then(res => res.json())
@@ -181,6 +188,12 @@ hideIntermediate=${ hideIntermediates() }`)
 
     return (
         <Layout title={ "Truth tables" }>
+
+            <Show when={ import.meta.env.DEV ?? false } keyed>
+                (DEV) Use localhost:
+                <MySwitch title={ "Use localhost" } defaultValue={ false }
+                          onChange={ setUseLocalhost } />
+            </Show>
 
             <div id={ "truth-content" }>
                 <div class={ "max-w-2xl mx-auto" }>
