@@ -29,7 +29,7 @@ interface ButtonProps extends TitleProps {
 
 interface InputProps<T> extends TitleProps {
     onInput?: JSX.EventHandlerUnion<T, Event>,
-    placeholder?: string | null,
+    placeholder?: string,
     required?: boolean,
     type?: string,
 }

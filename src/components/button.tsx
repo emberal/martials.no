@@ -49,13 +49,10 @@ export const Button: Component<ButtonProps> = (
         onClick,
         type = "button",
     }
-) => {
-    return (
-        <button title={ title } id={ id } type={ type }
-                class={ `border-rounded bg-cyan-900 px-2 cursor-pointer ${ className }` }
-                onClick={ onClick }>
-            { children }
-        </button>
-    );
-};
-
+) => (
+    <button title={ title } id={ id } type={ type }
+            class={ `border-rounded bg-cyan-900 px-2 cursor-pointer ${ className }` }
+            onClick={ onClick }>
+        { children }
+    </button>
+);

@@ -1,6 +1,6 @@
 /* @refresh reload */
 import Layout from "./components/layout";
-import { Input } from "./components/input";
+import { Input, Search } from "./components/input";
 import { Icon } from "solid-heroicons";
 import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
@@ -15,15 +15,15 @@ import {
     check,
     eye,
     eyeSlash,
-    funnel,
-    magnifyingGlass,
-    xMark
+    funnel
 } from "solid-heroicons/solid";
 import { Button, MySwitch } from "./components/button";
 import MyDialog from "./components/dialog";
-import { exportToExcel } from "./functions/export";
+import { exportToExcel } from "./utils/export";
 import { Link } from "./components/link";
-import { isTouch } from "./functions/touch";
+import { isTouch } from "./utils/touch";
+import { replaceOperators } from "./utils/expressionUtils";
+import { getElementById } from "./utils/dom";
 
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
@@ -60,10 +60,6 @@ const TruthTablePage: Component = () => {
      * The state element used to store the simplified string, "empty string" by default
      */
     const [fetchResult, setFetchResult] = createSignal<FetchResult | null>(null);
-    /**
-     * If the searchbar is empty, this state is 'false', otherwise 'true'
-     */
-    const [typing, setTyping] = createSignal(inputContent);
 
     const hideOptions: Option[] = [
         { name: "Show all result", value: "NONE" },
@@ -98,7 +94,7 @@ const TruthTablePage: Component = () => {
         let exp = getInputElement()?.value;
 
         if (exp) {
-            exp = exp.replaceAll("|", ":").trimEnd();
+            exp = replaceOperators(exp);
 
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
 hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
@@ -107,10 +103,10 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
         }
     }
 
-    function getFetchResult(exp: string): void {
+    function getFetchResult(exp: string | null): void {
         setFetchResult(null);
 
-        if (exp !== "") {
+        if (exp && exp !== "") {
             setError(null);
             setIsLoaded(false);
 
@@ -132,34 +128,17 @@ hideIntermediate=${ hideIntermediates() }`)
     const inputId = "truth-input";
 
     function getInputElement(): HTMLInputElement | null {
-        return document.getElementById(inputId) as HTMLInputElement | null;
+        return getElementById(inputId);
     }
-
-    function onTyping(): void {
-        const el = getInputElement();
-        if (el && (el.value !== "") !== typing()) {
-            setTyping(el.value !== "");
-        }
-    }
-
-    function clearSearch(): void {
-        const el = getInputElement();
-        if (el) {
-            el.value = "";
-            setTyping(false);
-            history.replaceState(null, "", location.pathname);
-            el.focus();
-        }
-    }
-
-    const tableId = "truth-table";
-    const filenameId = "excel-filename";
 
     onMount((): void => {
+
+        const inputElement = getInputElement();
+
         if (searchParams.has("exp")) {
             const exp = searchParams.get("exp");
-            if (exp !== "") {
-                getInputElement().value = exp;
+            if (exp && inputElement) {
+                inputElement.value = exp;
             }
             const hide = searchParams.get("hide");
             if (hide) {
@@ -175,12 +154,15 @@ hideIntermediate=${ hideIntermediates() }`)
 
         // Focuses searchbar on load
         if (!isTouch()) {
-            getInputElement()?.focus();
+            inputElement?.focus();
         }
     });
 
+    const tableId = "truth-table";
+    const filenameId = "excel-filename";
+
     function _exportToExcel(): void {
-        const value = (document.getElementById(filenameId) as HTMLInputElement | null)?.value;
+        const value = getElementById<HTMLInputElement>(filenameId)?.value;
         exportToExcel({
             name: value !== "" ? value : undefined, tableId
         });
@@ -197,40 +179,12 @@ hideIntermediate=${ hideIntermediates() }`)
 
             <div id={ "truth-content" }>
                 <div class={ "max-w-2xl mx-auto" }>
-                    <MyDisclosureContainer>
-                        <MyDisclosure title={ "How to" }>
-                            <p>Fill in a truth expression and it will be simplified for you as much as possible.
-                               It will also genereate a truth table with all possible values. You can use a single
-                               letter,
-                               word or multiple words without spacing for each atomic value.
-                               If you do not want to simplify the expression, simply turn off the toggle.
-                               Keywords for operators are defined below. Parentheses is also allowed.</p>
-                            <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.
-                            </p>
-                        </MyDisclosure>
 
-                        <KeywordsDisclosure />
-
-                    </MyDisclosureContainer>
+                    <HowTo />
 
                     <form class={ "flex-row-center" } onSubmit={ onClick } autocomplete={ "off" }>
 
-                        <Input inputClass={ `rounded-xl pl-7 h-10 w-full pr-8` } className={ "w-full" }
-                               id={ "truth-input" }
-                               placeholder={ "¬A & B -> C" }
-                               type={ "text" }
-                               onChange={ onTyping }
-                               leading={ <Icon path={ magnifyingGlass } aria-label={ "Magnifying glass" }
-                                               class={ "pl-2 absolute" } /> }
-                               trailing={ <Show when={ typing() } keyed>
-                                   <button class={ "absolute right-2" }
-                                           title={ "Clear" }
-                                           type={ "reset" }
-                                           onClick={ clearSearch }>
-                                       <Icon path={ xMark } aria-label={ "The letter X" } />
-                                   </button>
-                               </Show> }
-                        />
+                        <Search id={ inputId } typingDefault={ inputContent } />
 
                         <Button id={ "truth-input-button" }
                                 title={ "Generate (Enter)" }
@@ -292,7 +246,7 @@ hideIntermediate=${ hideIntermediates() }`)
                                   onChange={ setHideIntermediates }
                                   defaultValue={ hideIntermediates() } />
 
-                        <Show when={ isLoaded() } keyed>
+                        <Show when={ isLoaded() && error() === null } keyed>
 
                             <MyDialog title={ "Download" }
                                       description={ "Export current table (.xlsx)" }
@@ -303,7 +257,7 @@ hideIntermediate=${ hideIntermediates() }`)
                                       callback={ _exportToExcel }
                                       acceptButtonName={ "Download" }
                                       cancelButtonName={ "Cancel" }
-                                      buttonClasses={ `float-right` }
+                                      buttonClass={ `float-right` }
                                       buttonTitle={ "Export current table" }
                                       acceptButtonId={ "download-accept" }>
                                 <p>{ "Filename" }:</p>
@@ -320,11 +274,11 @@ hideIntermediate=${ hideIntermediates() }`)
                     </Show>
 
                     <Show when={ error() && isLoaded() } keyed>
-                        <ErrorBox title={ error().title ?? "Error" }
-                                  error={ error().message ?? "Something went wrong" } />
+                        <ErrorBox title={ error()?.title ?? "Error" }
+                                  error={ error()?.message ?? "Something went wrong" } />
                     </Show>
 
-                    <Show when={ simplifyEnabled() && fetchResult()?.orderOperations?.length > 0 } keyed>
+                    <Show when={ simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0 } keyed>
                         <ShowMeHow fetchResult={ fetchResult } />
                     </Show>
 
@@ -341,7 +295,7 @@ hideIntermediate=${ hideIntermediates() }`)
                     <div class={ "flex justify-center m-2" }>
                         <div id={ "table" } class={ "h-[45rem] overflow-auto" }>
 
-                            <TruthTable header={ fetchResult()?.header }
+                            <TruthTable header={ fetchResult()?.header ?? undefined }
                                         table={ fetchResult()?.table?.truthMatrix } id={ tableId } />
 
                         </div>
@@ -362,8 +316,13 @@ interface SingleMenuItem {
     onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
 }
 
-const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onClick }) => {
-    const isSelected = () => currentValue()?.value === option.value;
+const SingleMenuItem: Component<SingleMenuItem> = (
+    {
+        option,
+        currentValue,
+        onClick
+    }) => {
+    const isSelected = () => currentValue && currentValue().value === option.value;
     return (
         <button class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
                 onClick={ onClick }>
@@ -374,91 +333,112 @@ const SingleMenuItem: Component<SingleMenuItem> = ({ option, currentValue, onCli
     );
 }
 
-const ErrorBox: Component<{ title: string, error: string }> = ({ title, error }) => {
-    return (
-        <InfoBox className={ "w-fit text-center mx-auto" }
-                 title={ title }
-                 error={ true }>
-            <p>{ error }</p>
-        </InfoBox>
-    )
-}
+const ErrorBox: Component<{ title: string, error: string }> = ({ title, error }) => (
+    <InfoBox className={ "w-fit text-center mx-auto" }
+             title={ title }
+             error={ true }>
+        <p>{ error }</p>
+    </InfoBox>
+);
 
 interface ShowMeHowProps {
-    fetchResult: Accessor<FetchResult>,
+    fetchResult: Accessor<FetchResult | null>,
 }
 
-const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => {
-    return (
-        <MyDisclosureContainer>
-            <MyDisclosure title={ "Show me how it's done" }>
-                <table class={ "table" }>
-                    <tbody>
+const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => (
+    <MyDisclosureContainer>
+        <MyDisclosure title={ "Show me how it's done" }>
+            <table class={ "table" }>
+                <tbody>
 
-                        <For each={ fetchResult()?.orderOperations }>{
-                            (operation, index) => (
-                                <tr class={ "border-b border-dotted border-gray-500" }>
-                                    <td>{ index() + 1 }:</td>
-                                    <td class={ "px-2" }>{
+                    <For each={ fetchResult()?.orderOperations }>{
+                        (operation, index) => (
+                            <tr class={ "border-b border-dotted border-gray-500" }>
+                                <td>{ index() + 1 }:</td>
+                                <td class={ "px-2" }>{
 
-                                        <For each={ diffChars(operation.before, operation.after) }>
-                                            { (part) => (
-                                                <span class={
-                                                    `${ part.added && "bg-green-700" }
+                                    <For each={ diffChars(operation.before, operation.after) }>
+                                        { (part) => (
+                                            <span class={
+                                                `${ part.added && "bg-green-700" }
                                                                     ${ part.removed && "bg-red-700" }` }>
                                                                 { part.value }
                                                             </span>) }
-                                        </For> }
+                                    </For> }
 
-                                        <Show
-                                            when={ typeof window !== "undefined" && window.outerWidth <= 640 }
-                                            keyed>
-                                            <p>{ "using" }: { operation.law }</p>
-                                        </Show>
-
-                                    </td>
-                                    <Show
-                                        when={ typeof window !== "undefined" && window.outerWidth > 640 }
-                                        keyed>
-                                        <td>{ "using" }: { operation.law }</td>
+                                    <Show when={ typeof window !== "undefined" && window.outerWidth <= 640 } keyed>
+                                        <p>{ "using" }: { operation.law }</p>
                                     </Show>
-                                </tr>
-                            ) }
-                        </For>
 
-                    </tbody>
-                </table>
-            </MyDisclosure>
-        </MyDisclosureContainer>
-    )
-}
+                                </td>
+                                <Show when={ typeof window !== "undefined" && window.outerWidth > 640 } keyed>
+                                    <td>{ "using" }: { operation.law }</td>
+                                </Show>
+                            </tr>
+                        ) }
+                    </For>
 
-const KeywordsDisclosure = () => {
-    return (
-        <MyDisclosure title={ "Keywords" }>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Not:</td>
-                        <td>!</td>
-                    </tr>
-                    <tr>
-                        <td>And:</td>
-                        <td>&</td>
-                    </tr>
-                    <tr>
-                        <td>Or:</td>
-                        <td>|</td>
-                        <td>/</td>
-                    </tr>
-                    <tr>
-                        <td class={ "pr-2" }>Implication:</td>
-                        <td>{ "->" }</td>
-                    </tr>
                 </tbody>
             </table>
         </MyDisclosure>
-    );
-};
+    </MyDisclosureContainer>
+);
+
+const HowTo: Component = () => (
+    <MyDisclosureContainer>
+        <MyDisclosure title={ "How to" }>
+            <p>Fill in a truth expression and it will be simplified for you as much as possible.
+               It will also genereate a truth table with all possible values. You can use a single
+               letter,
+               word or multiple words without spacing for each atomic value.
+               If you do not want to simplify the expression, simply turn off the toggle.
+               Keywords for operators are defined below. Parentheses is also allowed.</p>
+            <p>API docs can be found <Link to={ "https://api.martials.no/simplify-truths" }>here</Link>.
+            </p>
+        </MyDisclosure>
+
+        <KeywordsDisclosure />
+
+    </MyDisclosureContainer>
+);
+
+const KeywordsDisclosure: Component = () => (
+    <MyDisclosure title={ "Keywords" }>
+        <table>
+            <thead>
+                <tr class={ "text-left" }>
+                    <th>Name</th>
+                    <th class={ "pr-2" }>API</th>
+                    <th>Other</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Not:</td>
+                    <td>!</td>
+                    <td>NOT</td>
+                </tr>
+                <tr>
+                    <td>And:</td>
+                    <td>&</td>
+                    <td>AND</td>
+                </tr>
+                <tr>
+                    <td>Or:</td>
+                    <td>:</td>
+                    <td>|</td>
+                    <td>/</td>
+                    <td>OR</td>
+                </tr>
+                <tr>
+                    <td class={ "pr-2" }>Implication:</td>
+                    <td>{ "->" }</td>
+                    <td class={ "px-2" }>IMPLICATION</td>
+                    <td>IMP</td>
+                </tr>
+            </tbody>
+        </table>
+    </MyDisclosure>
+);
 
 render(() => <TruthTablePage />, document.getElementById("root") as HTMLElement);

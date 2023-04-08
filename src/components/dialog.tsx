@@ -1,22 +1,23 @@
 /* @refresh reload */
 import { Dialog, DialogDescription, DialogPanel, DialogTitle } from "solid-headless";
 import type { TitleProps } from "../types/types";
-import { createEffect, createSignal, JSX } from "solid-js";
+import { Component, createEffect, createSignal, JSX } from "solid-js";
 import { Button } from "./button";
 import { Portal } from "solid-js/web";
+import { getElementById } from "../utils/dom";
 
 interface MyDialog extends TitleProps {
     description?: string,
     button?: JSX.Element,
-    acceptButtonName?: string | null,
+    acceptButtonName?: string,
     acceptButtonId?: string,
-    cancelButtonName?: string | null,
+    cancelButtonName?: string,
     callback?: () => void,
-    buttonClasses?: string,
+    buttonClass?: string,
     buttonTitle?: string | null,
 }
 
-export default function MyDialog(
+const MyDialog: Component<MyDialog> = (
     {
         title,
         description,
@@ -26,10 +27,10 @@ export default function MyDialog(
         children,
         callback,
         className,
-        buttonClasses,
+        buttonClass,
         buttonTitle,
         acceptButtonId,
-    }: MyDialog): JSX.Element {
+    }) => {
 
     const [isOpen, setIsOpen] = createSignal(false);
 
@@ -48,20 +49,21 @@ export default function MyDialog(
          * @param e KeyboardEvent of keypress
          */
         function click(e: KeyboardEvent): void {
-            if (isMounted && e.key === "Enter") {
-                (document.getElementById(acceptButtonId ?? "") as HTMLButtonElement | null)?.click();
+            if (isMounted && e.key === "Enter" && acceptButtonId) {
+                getElementById<HTMLButtonElement>(acceptButtonId)?.click();
             }
         }
 
         if (isOpen()) {
             const id = "cl-6"
-            const el = document.getElementById(id);
-            el?.addEventListener("keypress", e => click(e));
+            const el = getElementById(id);
+            el?.addEventListener("keypress", click);
             return () => {
-                el?.removeEventListener("keypress", e => click(e));
+                el?.removeEventListener("keypress", click);
                 isMounted = false;
             }
         }
+        else return () => undefined;
     }
 
     createEffect(setupKeyPress, isOpen());
@@ -69,7 +71,7 @@ export default function MyDialog(
     return (
         <div class={ "w-fit h-fit" }>
 
-            <button onClick={ () => setIsOpen(true) } class={ buttonClasses } title={ buttonTitle ?? undefined }>
+            <button onClick={ () => setIsOpen(true) } class={ buttonClass } title={ buttonTitle ?? undefined }>
                 { button }
             </button>
 
@@ -99,3 +101,5 @@ export default function MyDialog(
         </div>
     );
 }
+
+export default MyDialog;
