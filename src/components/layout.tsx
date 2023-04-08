@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { TitleProps } from "../types/interfaces";
+import type { TitleProps } from "../types/types";
 import Header from "./header";
 import Footer from "./footer";
 

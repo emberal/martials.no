@@ -1,6 +1,6 @@
 /* @refresh reload */
-import type { SimpleProps } from "../types/interfaces";
-import type { Table } from "../types/interfaces";
+import type { SimpleProps } from "../types/types";
+import type { Table } from "../types/types";
 import { For } from "solid-js/web";
 import { type Component } from "solid-js";
 

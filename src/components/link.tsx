@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { LinkProps } from "../types/interfaces";
+import type { LinkProps } from "../types/types";
 
 export const Link: Component<LinkProps> = (
     {

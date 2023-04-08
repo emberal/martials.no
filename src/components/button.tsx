@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component, createSignal } from "solid-js";
-import type { ButtonProps, TitleProps } from "../types/interfaces";
+import type { ButtonProps, TitleProps } from "../types/types";
 
 interface SwitchProps extends TitleProps {
     defaultValue?: boolean,

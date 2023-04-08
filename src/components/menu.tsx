@@ -1,5 +1,5 @@
 /* @refresh reload */
-import type { TitleProps } from "../types/interfaces";
+import type { TitleProps } from "../types/types";
 import { type Component, createEffect, createSignal, JSX, Show } from "solid-js";
 import { Button } from "./button";
 

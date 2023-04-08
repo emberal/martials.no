@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component, createSignal, JSX, Setter } from "solid-js";
-import type { InputProps } from "../types/interfaces";
+import type { InputProps } from "../types/types";
 import Row from "./row";
 
 function setupEventListener(id: string, setIsHover: Setter<boolean>): () => void {

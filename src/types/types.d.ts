@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
 
-export interface SimpleProps {
+interface SimpleProps {
     name?: string;
     className?: string,
     style?: JSX.CSSProperties,
@@ -8,37 +8,37 @@ export interface SimpleProps {
     title?: string,
 }
 
-export interface ChildProps extends SimpleProps {
+interface ChildProps extends SimpleProps {
     children?: JSX.Element,
 }
 
-export interface LinkProps extends ChildProps {
+interface LinkProps extends ChildProps {
     to?: string,
     rel?: string,
     newTab?: boolean,
 }
 
-export interface TitleProps extends ChildProps {
+interface TitleProps extends ChildProps {
     title?: string,
 }
 
-export interface ButtonProps extends TitleProps {
+interface ButtonProps extends TitleProps {
     onClick?: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
     type?: "button" | "submit" | "reset",
 }
 
-export interface InputProps<T> extends TitleProps {
+interface InputProps<T> extends TitleProps {
     onInput?: JSX.EventHandlerUnion<T, Event>,
     placeholder?: string | null,
     required?: boolean,
     type?: string,
 }
 
-export interface CardProps extends LinkProps {
+interface CardProps extends LinkProps {
     title?: string;
 }
 
-export type Expression = {
+type Expression = {
     leading: string,
     left: Expression | null,
     operator: Operator | null,
@@ -47,18 +47,19 @@ export type Expression = {
     atomic: string | null,
 };
 
-export type Operator = "AND" | "OR" | "NOT" | "IMPLICATION";
+type Operator = "AND" | "OR" | "NOT" | "IMPLICATION";
 
-export type Table = boolean[][];
+type Table = boolean[][];
 
-export type OrderOfOperations = {
+type OrderOfOperations = {
     before: string,
     after: string,
     law: string,
 }[];
 
-export type FetchResult = {
+type FetchResult = {
     status: string,
+    version: string | null,
     before: string,
     after: string,
     orderOperations: OrderOfOperations | null,

@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { CardProps } from "../types/interfaces";
+import type { CardProps } from "../types/types";
 import { Link } from "./link";
 
 const Card: Component<CardProps> = ({ children, className, title, to, newTab = false }) => {

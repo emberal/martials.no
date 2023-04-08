@@ -6,7 +6,7 @@ import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
 import { diffChars } from "diff";
 import MyMenu from "./components/menu";
-import type { FetchResult } from "./types/interfaces";
+import type { FetchResult } from "./types/types";
 import { type Accessor, type Component, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";

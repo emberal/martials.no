@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { SimpleProps } from "../types/interfaces";
+import type { SimpleProps } from "../types/types";
 import { Link } from "./link";
 
 const Footer: Component<SimpleProps> = ({ className }) => {
