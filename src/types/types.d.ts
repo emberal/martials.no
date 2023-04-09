@@ -51,18 +51,18 @@ type Operator = "AND" | "OR" | "NOT" | "IMPLICATION";
 
 type Table = boolean[][];
 
-type OrderOfOperations = {
+type OrderOfOperation = {
     before: string,
     after: string,
     law: string,
-}[];
+};
 
 type FetchResult = {
     status: string,
     version: string | null,
     before: string,
     after: string,
-    orderOperations: OrderOfOperations | null,
+    orderOperations: OrderOfOperation[] | null,
     expression: Expression | null,
     header: string[] | null,
     table: {

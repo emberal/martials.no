@@ -6,7 +6,7 @@ import TruthTable from "./components/truth-table";
 import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
 import { diffChars } from "diff";
 import MyMenu from "./components/menu";
-import type { FetchResult } from "./types/types";
+import type { FetchResult, OrderOfOperation } from "./types/types";
 import { type Accessor, type Component, createSignal, JSX, onMount, Show } from "solid-js";
 import { For, render } from "solid-js/web";
 import Row from "./components/row";
@@ -94,10 +94,11 @@ const TruthTablePage: Component = () => {
         let exp = getInputElement()?.value;
 
         if (exp) {
-            exp = replaceOperators(exp);
 
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
 hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
+
+            exp = replaceOperators(exp);
 
             getFetchResult(exp);
         }
@@ -351,31 +352,8 @@ const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => (
             <table class={ "table" }>
                 <tbody>
 
-                    <For each={ fetchResult()?.orderOperations }>{
-                        (operation, index) => (
-                            <tr class={ "border-b border-dotted border-gray-500" }>
-                                <td>{ index() + 1 }:</td>
-                                <td class={ "px-2" }>{
-
-                                    <For each={ diffChars(operation.before, operation.after) }>
-                                        { (part) => (
-                                            <span class={
-                                                `${ part.added && "bg-green-700" }
-                                                                    ${ part.removed && "bg-red-700" }` }>
-                                                                { part.value }
-                                                            </span>) }
-                                    </For> }
-
-                                    <Show when={ typeof window !== "undefined" && window.outerWidth <= 640 } keyed>
-                                        <p>{ "using" }: { operation.law }</p>
-                                    </Show>
-
-                                </td>
-                                <Show when={ typeof window !== "undefined" && window.outerWidth > 640 } keyed>
-                                    <td>{ "using" }: { operation.law }</td>
-                                </Show>
-                            </tr>
-                        ) }
+                    <For each={ fetchResult()?.orderOperations }>
+                        { orderOperationRow() }
                     </For>
 
                 </tbody>
@@ -386,6 +364,7 @@ const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => (
 
 const HowTo: Component = () => (
     <MyDisclosureContainer>
+
         <MyDisclosure title={ "How to" }>
             <p>Fill in a truth expression and it will be simplified for you as much as possible.
                It will also genereate a truth table with all possible values. You can use a single
@@ -400,6 +379,30 @@ const HowTo: Component = () => (
         <KeywordsDisclosure />
 
     </MyDisclosureContainer>
+);
+
+const orderOperationRow = () => (operation: OrderOfOperation, index: Accessor<number>) => (
+    <tr class={ "border-b border-dotted border-gray-500" }>
+        <td>{ index() + 1 }:</td>
+        <td class={ "px-2" }>{
+
+            <For each={ diffChars(operation.before, operation.after) }>
+                { (part) => (
+                    <span class={ `${ part.added && "bg-green-700" } ${ part.removed && "bg-red-700" }` }>
+                            { part.value }
+                        </span>
+                ) }
+            </For> }
+
+            <Show when={ typeof window !== "undefined" && window.outerWidth <= 640 } keyed>
+                <p>{ "using" }: { operation.law }</p>
+            </Show>
+
+        </td>
+        <Show when={ typeof window !== "undefined" && window.outerWidth > 640 } keyed>
+            <td>{ "using" }: { operation.law }</td>
+        </Show>
+    </tr>
 );
 
 const KeywordsDisclosure: Component = () => (
