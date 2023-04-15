@@ -5,9 +5,9 @@
  */
 export function replaceOperators(expression: string): string {
 
-    expression = expression.replaceAll(/[|/]/g, ":");
+    expression = expression.replaceAll(/\//g, "|");
     expression = expression.replaceAll(/¬/g, "!");
-    expression = expression.replaceAll(/\sOR\s/gi, " : ");
+    expression = expression.replaceAll(/\sOR\s/gi, " | ");
     expression = expression.replaceAll(/\sAND\s/gi, " & ");
     expression = expression.replaceAll(/\s(IMPLICATION|IMP)\s/gi, " -> ");
     expression = expression.replaceAll(/\sNOT\s/gi, " !");
