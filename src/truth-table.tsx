@@ -98,7 +98,6 @@ const TruthTablePage: Component = () => {
             history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
 hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
 
-            exp = replaceOperators(exp);
 
             getFetchResult(exp);
         }
@@ -108,6 +107,7 @@ hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hi
         setFetchResult(null);
 
         if (exp && exp !== "") {
+            exp = replaceOperators(exp);
             setError(null);
             setIsLoaded(false);
 
