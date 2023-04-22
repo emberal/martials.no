@@ -29,7 +29,7 @@ type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TR
 
 const fetchUrls = [
     "http://localhost:8080/simplify/table/",
-    "https://api.martials.no/simplify-truths/do/simplify/table/"
+    "https://api.martials.no/simplify-truths/simplify/table/"
 ];
 
 // TODO move some code to new components
