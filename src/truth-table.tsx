@@ -428,7 +428,6 @@ const KeywordsDisclosure: Component = () => (
                 </tr>
                 <tr>
                     <td>Or:</td>
-                    <td>:</td>
                     <td>|</td>
                     <td>/</td>
                     <td>OR</td>
