@@ -1,7 +1,6 @@
 /* @refresh reload */
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from "solid-headless";
 import { Icon } from "solid-heroicons";
-import type { ChildProps, TitleProps } from "../types/types";
 import { type Component, JSX } from "solid-js";
 import { chevronUp } from "solid-heroicons/solid";
 

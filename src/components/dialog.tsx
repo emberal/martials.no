@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { Dialog, DialogDescription, DialogPanel, DialogTitle } from "solid-headless";
-import type { TitleProps } from "../types/types";
 import { Component, createEffect, createSignal, JSX } from "solid-js";
 import { Button } from "./button";
 import { Portal } from "solid-js/web";

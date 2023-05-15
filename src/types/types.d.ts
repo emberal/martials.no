@@ -1,15 +1,13 @@
-import { JSX } from "solid-js";
-
 interface SimpleProps {
     name?: string;
     className?: string,
-    style?: JSX.CSSProperties,
+    style?: import("solid-js").JSX.CSSProperties,
     id?: string,
     title?: string,
 }
 
 interface ChildProps extends SimpleProps {
-    children?: JSX.Element,
+    children?: import("solid-js").JSX.Element,
 }
 
 interface LinkProps extends ChildProps {
@@ -23,12 +21,12 @@ interface TitleProps extends ChildProps {
 }
 
 interface ButtonProps extends TitleProps {
-    onClick?: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
+    onClick?: import("solid-js").JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>,
     type?: "button" | "submit" | "reset",
 }
 
 interface InputProps<T> extends TitleProps {
-    onInput?: JSX.EventHandlerUnion<T, Event>,
+    onInput?: import("solid-js").JSX.EventHandlerUnion<T, Event>,
     placeholder?: string,
     required?: boolean,
     type?: string,

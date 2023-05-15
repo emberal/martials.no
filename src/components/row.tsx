@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { ChildProps } from "../types/types";
 
 /**
  * A row that centers its children

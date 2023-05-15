@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { type Component, createSignal, JSX, onMount, Setter, Show } from "solid-js";
-import type { InputProps } from "../types/types";
 import Row from "./row";
 import { Icon } from "solid-heroicons";
 import { magnifyingGlass, xMark } from "solid-heroicons/solid";

@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { type Component, Show } from "solid-js";
-import type { TitleProps } from "../types/types";
 import { Icon } from "solid-heroicons";
 import { chevronLeft } from "solid-heroicons/solid";
 import { Link } from "./link";

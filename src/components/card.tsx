@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { type Component } from "solid-js";
-import type { CardProps } from "../types/types";
 import { Link } from "./link";
 
 const Card: Component<CardProps> = (

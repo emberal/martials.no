@@ -5,7 +5,6 @@ import "./index.css";
 import { type Component } from "solid-js";
 import Layout from "./components/layout";
 import Card from "./components/card";
-import type { CardProps } from "./types/types";
 import { Link } from "./components/link";
 
 const apiRoot = "https://api.martials.no";
