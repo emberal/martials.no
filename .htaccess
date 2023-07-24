@@ -1,4 +1,4 @@
-ErrorDocument 404 /404.html
+ErrorDocument 404 /index.html
 
 <IfModule mod_headers.c>
     Header add Access-Control-Allow-Origin 'https://api.martials.no/'

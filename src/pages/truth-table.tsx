@@ -245,19 +245,18 @@ hideIntermediate=${ hideIntermediates() }`)
                         </Show>
 
                     </Row>
+                    
+                    <Show when={ error() } keyed>
+                        <ErrorBox title={ error()?.title ?? "Error" }
+                                  error={ error()?.message ?? "Something went wrong" } />
+                    </Show>
 
-                    <Show when={ isLoaded() } fallback={
+                    <Show when={ isLoaded() === false } keyed>
                         <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
-                    } keyed>
+                    </Show>
 
-                        <Show when={ error() } keyed>
-                            <ErrorBox title={ error()?.title ?? "Error" }
-                                      error={ error()?.message ?? "Something went wrong" } />
-                        </Show>
-
-                        <Show when={ simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0 } keyed>
-                            <ShowMeHow fetchResult={ fetchResult } />
-                        </Show>
+                    <Show when={ simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0 } keyed>
+                        <ShowMeHow fetchResult={ fetchResult } />
                     </Show>
 
                 </div>
