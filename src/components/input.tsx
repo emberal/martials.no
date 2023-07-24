@@ -38,7 +38,7 @@ function setSetIsText(id: string | undefined, isText: boolean, setIsText: Setter
     }
 }
 
-interface Input<T> extends InputProps<T> {
+interface Input<T extends HTMLElement> extends InputProps<T> {
     leading?: JSX.Element,
     trailing?: JSX.Element,
     onChange?: () => void,
@@ -57,7 +57,8 @@ export const Input: Component<Input<HTMLInputElement>> = ( // TODO remove leadin
         onChange,
         leading,
         trailing,
-        inputClass
+        inputClass,
+        ref
     }): JSX.Element => {
 
     /**
@@ -87,6 +88,7 @@ export const Input: Component<Input<HTMLInputElement>> = ( // TODO remove leadin
                 class={ `bg-default-bg focus:border-cyan-500 outline-none border-2 border-gray-500 
                 hover:border-t-cyan-400 ${ inputClass }` }
                 id={ id }
+                ref={ ref }
                 onFocus={ () => setIsFocused(true) }
                 onBlur={ () => setIsFocused(false) }
                 name={ name ?? undefined }
@@ -127,7 +129,8 @@ export const Search: Component<SearchProps> = (
     {
         typingDefault = false,
         id = "search",
-        className
+        className,
+        ref
     }) => {
 
     const [typing, setTyping] = createSignal(typingDefault);
@@ -156,6 +159,7 @@ export const Search: Component<SearchProps> = (
     return (
         <Input inputClass={ `rounded-xl pl-7 h-10 w-full pr-8` } className={ `w-full ${ className }` }
                id={ id }
+               ref={ ref }
                placeholder={ "¬A & B -> C" }
                type={ "text" }
                onChange={ onChange }

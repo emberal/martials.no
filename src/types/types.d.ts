@@ -1,12 +1,13 @@
-interface SimpleProps {
+interface SimpleProps<T extends HTMLElement = HTMLElement> {
     name?: string;
     className?: string,
     style?: import("solid-js").JSX.CSSProperties,
     id?: string,
     title?: string,
+    ref?: T,
 }
 
-interface ChildProps extends SimpleProps {
+interface ChildProps<T extends HTMLElement = HTMLInputElement> extends SimpleProps<T> {
     children?: import("solid-js").JSX.Element,
 }
 
@@ -16,7 +17,7 @@ interface LinkProps extends ChildProps {
     newTab?: boolean,
 }
 
-interface TitleProps extends ChildProps {
+interface TitleProps<T extends HTMLElement = HTMLElement> extends ChildProps<T> {
     title?: string,
 }
 
@@ -25,7 +26,7 @@ interface ButtonProps extends TitleProps {
     type?: "button" | "submit" | "reset",
 }
 
-interface InputProps<T> extends TitleProps {
+interface InputProps<T extends HTMLElement = HTMLInputElement> extends TitleProps<T> {
     onInput?: import("solid-js").JSX.EventHandlerUnion<T, Event>,
     placeholder?: string,
     required?: boolean,

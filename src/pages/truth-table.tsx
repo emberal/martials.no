@@ -1,14 +1,14 @@
 /* @refresh reload */
-import Layout from "./components/layout";
-import { Input, Search } from "./components/input";
+import Layout from "../components/layout";
+import { Input, Search } from "../components/input";
 import { Icon } from "solid-heroicons";
-import TruthTable from "./components/truth-table";
-import { InfoBox, MyDisclosure, MyDisclosureContainer } from "./components/output";
+import TruthTable from "../components/truth-table";
+import { InfoBox, MyDisclosure, MyDisclosureContainer } from "../components/output";
 import { diffChars } from "diff";
-import MyMenu from "./components/menu";
+import MyMenu from "../components/menu";
 import { type Accessor, type Component, createSignal, JSX, onMount, Show } from "solid-js";
-import { For, render } from "solid-js/web";
-import Row from "./components/row";
+import { For } from "solid-js/web";
+import Row from "../components/row";
 import {
     arrowDownTray, arrowPath,
     check,
@@ -16,13 +16,14 @@ import {
     eyeSlash,
     funnel
 } from "solid-heroicons/solid";
-import { Button, MySwitch } from "./components/button";
-import MyDialog from "./components/dialog";
-import { exportToExcel } from "./utils/export";
-import { Link } from "./components/link";
-import { isTouch } from "./utils/touch";
-import { replaceOperators } from "./utils/expressionUtils";
-import { getElementById } from "./utils/dom";
+import { Button, MySwitch } from "../components/button";
+import MyDialog from "../components/dialog";
+import { exportToExcel } from "../utils/export";
+import { Link } from "../components/link";
+import { isTouch } from "../utils/touch";
+import { replaceOperators } from "../utils/expressionUtils";
+import { getElementById } from "../utils/dom";
+import { useSearchParams } from "@solidjs/router";
 
 type Option = { name: string, value: "NONE" | "TRUE" | "FALSE" | "DEFAULT" | "TRUE_FIRST" | "FALSE_FIRST" };
 
@@ -34,30 +35,14 @@ const fetchUrls = [
 // TODO move some code to new components
 const TruthTablePage: Component = () => {
 
-    let searchParams: URLSearchParams;
-    let simplifyDefault = true, inputContent = false, hideIntermediate = false;
+    const [searchParams, setSearchParams] = useSearchParams();
+    let inputElement: HTMLInputElement | undefined = undefined;
 
-    if (typeof location !== "undefined") {
-        searchParams = new URLSearchParams(location.search);
+    let simplifyDefault = searchParams.simplify === undefined || searchParams.simplify === "true",
+        inputContent = !!searchParams.exp,
+        hideIntermediate = searchParams.hideIntermediate === "true";
 
-        if (searchParams.has("simplify")) {
-            simplifyDefault = searchParams.get("simplify") === "true";
-        }
-        if (searchParams.has("exp")) {
-            inputContent = true;
-        }
-        if (searchParams.has("hideIntermediate")) {
-            hideIntermediate = searchParams.get("hideIntermediate") === "true";
-        }
-    }
-
-    /**
-     * Stores the boolean value of the simplify toggle
-     */
     const [simplifyEnabled, setSimplifyEnabled] = createSignal(simplifyDefault);
-    /**
-     * The state element used to store the simplified string, "empty string" by default
-     */
     const [fetchResult, setFetchResult] = createSignal<FetchResult | null>(null);
 
     const hideOptions: Option[] = [
@@ -75,28 +60,28 @@ const TruthTablePage: Component = () => {
     ];
 
     const [sortValues, setSortValues] = createSignal(sortOptions[0]);
-
     const [hideIntermediates, setHideIntermediates] = createSignal(hideIntermediate);
-
     const [isLoaded, setIsLoaded] = createSignal<boolean | null>(null);
-
     const [error, setError] = createSignal<{ title: string, message: string } | null>(null);
-
     const [useLocalhost, setUseLocalhost] = createSignal(false);
 
     /**
      * Updates the state of the current expression to the new search with all whitespace removed.
      * If the element is not found, reset.
      */
-    function onClick(e: { preventDefault: () => void; }): void {
+    function onClick(e: Event): void {
         e.preventDefault(); // Stops the page from reloading onClick
-        let exp = getInputElement()?.value;
+        const exp = inputElement?.value;
 
         if (exp) {
 
-            history.pushState(null, "", `?exp=${ encodeURIComponent(exp) }&simplify=${ simplifyEnabled() }&
-hide=${ hideValues().value }&sort=${ sortValues().value }&hideIntermediate=${ hideIntermediates() }`);
-
+            setSearchParams({
+                exp,
+                simplify: simplifyEnabled(),
+                hide: hideValues().value,
+                sort: sortValues().value,
+                hideIntermediate: hideIntermediates()
+            });
 
             getFetchResult(exp);
         }
@@ -125,26 +110,18 @@ hideIntermediate=${ hideIntermediates() }`)
         }
     }
 
-    const inputId = "truth-input";
-
-    function getInputElement(): HTMLInputElement | null {
-        return getElementById(inputId);
-    }
-
     onMount((): void => {
 
-        const inputElement = getInputElement();
-
-        if (searchParams.has("exp")) {
-            const exp = searchParams.get("exp");
+        if (searchParams.exp) {
+            const exp = searchParams.exp;
             if (exp && inputElement) {
                 inputElement.value = exp;
             }
-            const hide = searchParams.get("hide");
+            const hide = searchParams.hide;
             if (hide) {
                 setHideValues(hideOptions.find(o => o.value === hide) ?? hideOptions[0]);
             }
-            const sort = searchParams.get("sort");
+            const sort = searchParams.sort;
             if (sort) {
                 setSortValues(sortOptions.find(o => o.value === sort) ?? sortOptions[0]);
             }
@@ -184,7 +161,7 @@ hideIntermediate=${ hideIntermediates() }`)
 
                     <form class={ "flex-row-center" } onSubmit={ onClick } autocomplete={ "off" }>
 
-                        <Search id={ inputId } typingDefault={ inputContent } />
+                        <Search ref={ inputElement } typingDefault={ inputContent } />
 
                         <Button id={ "truth-input-button" }
                                 title={ "Generate (Enter)" }
@@ -269,17 +246,18 @@ hideIntermediate=${ hideIntermediates() }`)
 
                     </Row>
 
-                    <Show when={ isLoaded() === false } keyed>
+                    <Show when={ isLoaded() } fallback={
                         <Icon path={ arrowPath } aria-label={ "Loading indicator" } class={ "animate-spin mx-auto" } />
-                    </Show>
+                    } keyed>
 
-                    <Show when={ error() && isLoaded() } keyed>
-                        <ErrorBox title={ error()?.title ?? "Error" }
-                                  error={ error()?.message ?? "Something went wrong" } />
-                    </Show>
+                        <Show when={ error() } keyed>
+                            <ErrorBox title={ error()?.title ?? "Error" }
+                                      error={ error()?.message ?? "Something went wrong" } />
+                        </Show>
 
-                    <Show when={ simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0 } keyed>
-                        <ShowMeHow fetchResult={ fetchResult } />
+                        <Show when={ simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0 } keyed>
+                            <ShowMeHow fetchResult={ fetchResult } />
+                        </Show>
                     </Show>
 
                 </div>
@@ -322,7 +300,7 @@ const SingleMenuItem: Component<SingleMenuItem> = (
         currentValue,
         onClick
     }) => {
-    const isSelected = () => currentValue && currentValue().value === option.value;
+    const isSelected = () => currentValue?.().value === option.value;
     return (
         <button class={ `hover:underline cursor-pointer last:mb-1 flex-row-center` }
                 onClick={ onClick }>
@@ -441,5 +419,3 @@ const KeywordsDisclosure: Component = () => (
         </table>
     </MyDisclosure>
 );
-
-render(() => <TruthTablePage />, document.getElementById("root") as HTMLElement);

@@ -10,9 +10,7 @@ export default defineConfig({
         target: 'esnext',
         rollupOptions: {
             input: {
-                main: "index.html",
-                "404": "404.html",
-                simplifyTruths: "simplify-truths.html",
+                main: "app.html",
             }
         }
     },
