@@ -3,6 +3,7 @@
   "version": "1.0",
   "description": "Landing page Martin Berg Alstad's APIs and other things",
   "scripts": {
+    "prestart": "npx only-allow pnpm",
     "dev": "vite",
     "build": "vite build && sh build_extra.sh",
     "serve": "vite preview"
