@@ -28,7 +28,7 @@ const cards = [
     {
         title: "Hjemmeside",
         children: <p>Sjekk ut mine andre prosjekter</p>,
-        to: "https://h600878.github.io/",
+        to: "https://emberal.github.io/",
         newTab: true,
     },
     {
