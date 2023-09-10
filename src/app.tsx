@@ -4,11 +4,13 @@ import TruthTablePage from "./pages/truth-table";
 import PageNotFound from "./pages/404";
 import { render } from "solid-js/web";
 import { type Component } from "solid-js";
+import FailureFunctionPage from "./pages/failureFunction";
 
 const App: Component = () => (
     <Routes>
         <Route path={ "/" } element={ <HomePage /> } />
         <Route path={ "/simplify-truths" } element={ <TruthTablePage /> } />
+        <Route path={ "/failure-function" } element={ <FailureFunctionPage /> } />
         <Route path={ "*" } element={ <PageNotFound /> } />
     </Routes>
 );
