@@ -1,5 +1,5 @@
 /* @refresh reload */
-import { type Component } from "solid-js";
+import { type Component } from "solid-js"
 
 /**
  * A row that centers its children
@@ -8,7 +8,7 @@ import { type Component } from "solid-js";
  * @returns The row
  */
 const Row: Component<ChildProps> = ({ children, className }) => (
-    <div class={ `flex-row-center ${ className }` }>{ children }</div>
-);
+  <div class={`flex-row-center ${className}`}>{children}</div>
+)
 
-export default Row;
+export default Row

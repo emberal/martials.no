@@ -1,4 +1,4 @@
-import { type BookType, utils, write, writeFile } from "xlsx";
+import { type BookType, utils, write, writeFile } from "xlsx"
 
 /**
  * Exports the generated truth table to an excel (.xlsx) file
@@ -27,17 +27,20 @@ import { type BookType, utils, write, writeFile } from "xlsx";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export function exportToExcel(
-    {
-        type = "xlsx",
-        name = "Truth Table",
-        dl = false,
-        tableId,
-    }: { type?: BookType, name?: string, dl?: boolean, tableId: string }): any {
-
-    const element = document.getElementById(tableId);
-    const wb = utils.table_to_book(element, { sheet: "sheet1" });
-    return dl ?
-        write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-        writeFile(wb, name + "." + type);
+export function exportToExcel({
+  type = "xlsx",
+  name = "Truth Table",
+  dl = false,
+  tableId
+}: {
+  type?: BookType
+  name?: string
+  dl?: boolean
+  tableId: string
+}): any {
+  const element = document.getElementById(tableId)
+  const wb = utils.table_to_book(element, { sheet: "sheet1" })
+  return dl
+    ? write(wb, { bookType: type, bookSST: true, type: "base64" })
+    : writeFile(wb, name + "." + type)
 }

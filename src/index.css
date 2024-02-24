@@ -3,46 +3,44 @@
 @tailwind utilities;
 
 @layer components {
+  .debug {
+    @apply border border-red-500;
+    @apply after:absolute after:content-['DEBUG'];
+  }
 
-    .debug {
-        @apply border border-red-500;
-        @apply after:content-['DEBUG'] after:absolute;
-    }
+  .flex-row-center {
+    @apply flex flex-row items-center;
+  }
 
-    .flex-row-center {
-        @apply flex flex-row items-center;
-    }
+  .border-rounded {
+    @apply rounded-2xl border border-gray-700;
+  }
 
-    .border-rounded {
-        @apply border rounded-2xl border-gray-700;
-    }
+  h1 {
+    @apply text-4xl;
+  }
 
-    h1 {
-        @apply text-4xl;
-    }
+  h2 {
+    @apply text-3xl;
+  }
 
-    h2 {
-        @apply text-3xl;
-    }
+  h3 {
+    @apply text-2xl;
+  }
 
-    h3 {
-        @apply text-2xl;
-    }
+  h4 {
+    @apply text-xl;
+  }
 
-    h4 {
-        @apply text-xl;
-    }
+  a {
+    @apply text-cyan-500 hover:underline;
+  }
 
-    a {
-        @apply hover:underline text-cyan-500;
-    }
+  li {
+    @apply ml-4 list-disc;
+  }
 
-    li {
-        @apply list-disc ml-4;
-    }
-
-    svg {
-        @apply pointer-events-none h-6 w-6;
-    }
-
+  svg {
+    @apply pointer-events-none h-6 w-6;
+  }
 }
