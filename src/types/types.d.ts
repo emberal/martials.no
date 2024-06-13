@@ -37,18 +37,25 @@ interface CardProps extends LinkProps {
   title?: string
 }
 
-type Expression = {
-  leading: string
-  left: Expression | null
-  operator: Operator | null
-  right: Expression | null
-  trailing: string
-  atomic: string | null
+type AtomicExpression = {
+  atomic: string
 }
 
-type Operator = "AND" | "OR" | "NOT" | "IMPLICATION"
+type NotExpression = {
+  not: Expression
+}
 
-type Table = boolean[][]
+type BinaryExpression = {
+  left: Expression
+  operator: BinaryOperator
+  right: Expression
+}
+
+type Expression = AtomicExpression | NotExpression | BinaryExpression
+
+type BinaryOperator = "AND" | "OR" | "IMPLICATION"
+
+type TruthMatrix = boolean[][]
 
 type OrderOfOperation = {
   before: string
@@ -57,14 +64,13 @@ type OrderOfOperation = {
 }
 
 type FetchResult = {
-  status: string
   version: string | null
   before: string
   after: string
-  orderOperations: OrderOfOperation[] | null
+  orderOfOperations: OrderOfOperation[]
   expression: Expression | null
-  header: string[] | null
-  table: {
-    truthMatrix: Table
+  truthTable?: {
+    header: string[]
+    truthMatrix: TruthMatrix
   } | null
 }

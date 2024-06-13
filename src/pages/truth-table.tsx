@@ -25,8 +25,8 @@ type Option = {
 }
 
 const fetchUrls = [
-  "http://localhost:8080/simplify/table/",
-  "https://api.martials.no/simplify-truths/simplify/table/"
+  "http://localhost:8000/simplify/table/",
+  "https://api.martials.no/simplify-truths/v2/simplify/table/"
 ]
 
 // TODO move some code to new components
@@ -78,11 +78,11 @@ const TruthTablePage: Component = () => {
         hideIntermediate: hideIntermediates()
       })
 
-      getFetchResult(exp)
+      void getFetchResult(exp)
     }
   }
 
-  function getFetchResult(exp: string | null): void {
+  async function getFetchResult(exp: string | null): Promise<void> {
     setFetchResult(null)
 
     if (exp && exp !== "") {
@@ -90,18 +90,30 @@ const TruthTablePage: Component = () => {
       setError(null)
       setIsLoaded(false)
 
-      fetch(`${fetchUrls[useLocalhost() ? 0 : 1]}${encodeURIComponent(exp)}?
+      try {
+        const response =
+          await fetch(`${fetchUrls[useLocalhost() ? 0 : 1]}${encodeURIComponent(exp)}?
 simplify=${simplifyEnabled()}&hide=${hideValues().value}&sort=${sortValues().value}&caseSensitive=false&
 hideIntermediate=${hideIntermediates()}`)
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.status !== "OK" && !res.ok) {
-            return setError({ title: "Input error", message: res.message })
-          }
-          return setFetchResult(res)
+
+        const body = await response.json()
+        if (!response.ok) {
+          setError({
+            title: "Input error",
+            message: body.message
+          })
+        } else {
+          const fetchResult: FetchResult = body
+          setFetchResult(fetchResult)
+        }
+      } catch (e: any) {
+        setError({
+          title: "Error",
+          message: e.message
         })
-        .catch((err) => setError({ title: "Fetch error", message: err.toString() }))
-        .finally(() => setIsLoaded(true))
+      } finally {
+        setIsLoaded(true)
+      }
     }
   }
 
@@ -120,7 +132,7 @@ hideIntermediate=${hideIntermediates()}`)
         setSortValues(sortOptions.find((o) => o.value === sort) ?? sortOptions[0])
       }
 
-      getFetchResult(exp)
+      void getFetchResult(exp)
     }
 
     // Focuses searchbar on load
@@ -286,12 +298,15 @@ hideIntermediate=${hideIntermediates()}`)
             />
           </Show>
 
-          <Show when={simplifyEnabled() && (fetchResult()?.orderOperations?.length ?? 0) > 0} keyed>
+          <Show
+            when={simplifyEnabled() && (fetchResult()?.orderOfOperations?.length ?? 0) > 0}
+            keyed
+          >
             <ShowMeHow fetchResult={fetchResult} />
           </Show>
         </div>
 
-        <Show when={isLoaded() && error() === null} keyed>
+        <Show when={isLoaded() && error() === null && fetchResult()?.truthTable} keyed>
           <Show when={simplifyEnabled()} keyed>
             <InfoBox
               className={"mx-auto w-fit pb-1 text-center text-lg"}
@@ -305,8 +320,8 @@ hideIntermediate=${hideIntermediates()}`)
           <div class={"m-2 flex justify-center"}>
             <div id={"table"} class={"h-[45rem] overflow-auto"}>
               <TruthTable
-                header={fetchResult()?.header ?? undefined}
-                table={fetchResult()?.table?.truthMatrix}
+                header={fetchResult()!.truthTable!.header}
+                table={fetchResult()!.truthTable!.truthMatrix}
                 id={tableId}
               />
             </div>
@@ -354,7 +369,7 @@ const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => (
     <MyDisclosure title={"Show me how it's done"}>
       <table class={"table"}>
         <tbody>
-          <For each={fetchResult()?.orderOperations}>{orderOperationRow()}</For>
+          <For each={fetchResult()?.orderOfOperations}>{orderOperationRow()}</For>
         </tbody>
       </table>
     </MyDisclosure>
@@ -437,7 +452,7 @@ const KeywordsDisclosure: Component = () => (
         </tr>
         <tr>
           <td class={"pr-2"}>Implication:</td>
-          <td>{"->"}</td>
+          <td>{"=>"}</td>
           <td class={"px-2"}>IMPLICATION</td>
           <td>IMP</td>
         </tr>
