@@ -55,19 +55,28 @@ type Expression = AtomicExpression | NotExpression | BinaryExpression
 
 type BinaryOperator = "AND" | "OR" | "IMPLICATION"
 
+type Law =
+  | "ELIMINATION_OF_IMPLICATION"
+  | "DE_MORGANS_LAWS"
+  | "ABSORPTION_LAW"
+  | "ASSOCIATIVE_LAW"
+  | "DISTRIBUTION_LAW"
+  | "DOUBLE_NEGATION_ELIMINATION"
+  | "COMMUTATIVE_LAW"
+
 type TruthMatrix = boolean[][]
 
-type OrderOfOperation = {
+type Operation = {
   before: string
   after: string
-  law: string
+  law: Law
 }
 
 type FetchResult = {
-  version: string | null
+  version: string
   before: string
   after: string
-  orderOfOperations: OrderOfOperation[]
+  operations: Operation[]
   expression: Expression | null
   truthTable?: {
     header: string[]

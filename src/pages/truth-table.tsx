@@ -298,10 +298,7 @@ hideIntermediate=${hideIntermediates()}`)
             />
           </Show>
 
-          <Show
-            when={simplifyEnabled() && (fetchResult()?.orderOfOperations?.length ?? 0) > 0}
-            keyed
-          >
+          <Show when={simplifyEnabled() && (fetchResult()?.operations?.length ?? 0) > 0} keyed>
             <ShowMeHow fetchResult={fetchResult} />
           </Show>
         </div>
@@ -369,7 +366,7 @@ const ShowMeHow: Component<ShowMeHowProps> = ({ fetchResult }) => (
     <MyDisclosure title={"Show me how it's done"}>
       <table class={"table"}>
         <tbody>
-          <For each={fetchResult()?.orderOfOperations}>{orderOperationRow()}</For>
+          <For each={fetchResult()?.operations}>{operationRow()}</For>
         </tbody>
       </table>
     </MyDisclosure>
@@ -395,7 +392,7 @@ const HowTo: Component = () => (
   </MyDisclosureContainer>
 )
 
-const orderOperationRow = () => (operation: OrderOfOperation, index: Accessor<number>) => (
+const operationRow = () => (operation: Operation, index: Accessor<number>) => (
   <tr class={"border-b border-dotted border-gray-500"}>
     <td>{index() + 1}:</td>
     <td class={"px-2"}>
