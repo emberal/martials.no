@@ -36,7 +36,7 @@ const TruthTablePage: Component = () => {
 
   let simplifyDefault = searchParams.simplify === undefined || searchParams.simplify === "true",
     inputContent = !!searchParams.exp,
-    hideIntermediate = searchParams.hideIntermediate === "true"
+    hideIntermediate = searchParams.hideIntermediateSteps === "true"
 
   const [simplifyEnabled, setSimplifyEnabled] = createSignal(simplifyDefault)
   const [fetchResult, setFetchResult] = createSignal<FetchResult | null>(null)
@@ -75,7 +75,7 @@ const TruthTablePage: Component = () => {
         simplify: simplifyEnabled(),
         hide: hideValues().value,
         sort: sortValues().value,
-        hideIntermediate: hideIntermediates()
+        hideIntermediateSteps: hideIntermediates()
       })
 
       void getFetchResult(exp)
@@ -94,7 +94,7 @@ const TruthTablePage: Component = () => {
         const response =
           await fetch(`${fetchUrls[useLocalhost() ? 0 : 1]}${encodeURIComponent(exp)}?
 simplify=${simplifyEnabled()}&hide=${hideValues().value}&sort=${sortValues().value}&caseSensitive=false&
-hideIntermediate=${hideIntermediates()}`)
+hideIntermediateSteps=${hideIntermediates()}`)
 
         const body = await response.json()
         if (!response.ok) {
