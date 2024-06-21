@@ -9,6 +9,6 @@ export function replaceOperators(expression: string): string {
     .replaceAll(/¬/g, "!")
     .replaceAll(/\sOR\s/gi, " | ")
     .replaceAll(/\sAND\s/gi, " & ")
-    .replaceAll(/\s(IMPLICATION|IMP)\s/gi, " -> ")
+    .replaceAll(/\s(IMPLICATION|IMP|->)\s/gi, " => ")
     .replaceAll(/\sNOT\s/gi, " !")
 }

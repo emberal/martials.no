@@ -30,6 +30,8 @@ const fetchUrls = [
 ]
 
 // TODO move some code to new components
+// TODO option to ignore case
+// TODO more user friendly options
 const TruthTablePage: Component = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   let inputElement: HTMLInputElement | undefined = undefined
@@ -93,7 +95,7 @@ const TruthTablePage: Component = () => {
       try {
         const response =
           await fetch(`${fetchUrls[useLocalhost() ? 0 : 1]}${encodeURIComponent(exp)}?
-simplify=${simplifyEnabled()}&hide=${hideValues().value}&sort=${sortValues().value}&caseSensitive=false&
+simplify=${simplifyEnabled()}&hide=${hideValues().value}&sort=${sortValues().value}&ignoreCase=false&
 hideIntermediateSteps=${hideIntermediates()}`)
 
         const body = await response.json()
