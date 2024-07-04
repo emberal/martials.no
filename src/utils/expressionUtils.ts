@@ -7,8 +7,8 @@ export function replaceOperators(expression: string): string {
   return expression
     .replaceAll(/\//g, "|")
     .replaceAll(/¬/g, "!")
-    .replaceAll(/\sOR\s/gi, " | ")
-    .replaceAll(/\sAND\s/gi, " & ")
+    .replaceAll(/\s(OR|⋁)\s/gi, " | ")
+    .replaceAll(/\s(AND|⋀)\s/gi, " & ")
     .replaceAll(/\s(IMPLICATION|IMP|->)\s/gi, " => ")
     .replaceAll(/\sNOT\s/gi, " !")
 }
