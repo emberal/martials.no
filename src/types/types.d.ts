@@ -72,14 +72,16 @@ type Operation = {
   law: Law
 }
 
+type Table = {
+  header: string[]
+  truthMatrix: TruthMatrix
+}
+
 type FetchResult = {
   version: string
   before: string
   after: string
   operations: Operation[]
   expression: Expression | null
-  truthTable?: {
-    header: string[]
-    truthMatrix: TruthMatrix
-  } | null
+  truthTable?: Table | null
 }

@@ -3,7 +3,7 @@ import { For } from "solid-js/web"
 import { type Component } from "solid-js"
 
 interface TruthTableProps extends SimpleProps {
-  table?: Table
+  table?: TruthMatrix
   header?: string[]
 }
 
@@ -20,8 +20,7 @@ const TruthTable: Component<TruthTableProps> = ({ table, header, className, styl
             <th
               scope={"col"}
               class={
-                `sticky top-0 bg-default-bg text-center outline
-                             outline-2 outline-offset-[-1px] outline-gray-500 [position:-webkit-sticky;]` /*TODO sticky header at the top of the screen */
+                `sticky top-0 bg-default-bg text-center outline outline-2 outline-offset-[-1px] outline-gray-500 [position:-webkit-sticky;]` /*TODO sticky header at the top of the screen */
               }
             >
               <p class={"w-max px-2"}>{exp}</p>
@@ -37,8 +36,7 @@ const TruthTable: Component<TruthTableProps> = ({ table, header, className, styl
             <For each={row}>
               {(value) => (
                 <td
-                  class={`border border-gray-500 text-center last:underline
-                                            ${value ? "bg-green-700" : "bg-red-700"}`}
+                  class={`border border-gray-500 text-center last:underline ${value ? "bg-green-700" : "bg-red-700"}`}
                 >
                   <p>{value ? "T" : "F"}</p>
                 </td>

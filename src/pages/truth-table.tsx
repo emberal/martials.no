@@ -34,7 +34,7 @@ const fetchUrls = [
 // TODO more user friendly options
 const TruthTablePage: Component = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  let inputElement: HTMLInputElement | undefined = undefined
+  let inputElement!: HTMLInputElement
 
   let simplifyDefault = searchParams.simplify === undefined || searchParams.simplify === "true",
     inputContent = !!searchParams.exp,
@@ -386,7 +386,8 @@ const HowTo: Component = () => (
         Parentheses is also allowed.
       </p>
       <p>
-        API docs can be found <Link to={"https://api.martials.no/simplify-truths"}>here</Link>.
+        API docs can be found{" "}
+        <Link to={"https://api.martials.no/simplify-truths/v2/openapi"}>here</Link>.
       </p>
     </MyDisclosure>
 
